@@ -19,7 +19,7 @@ function App() {
     setTimeout(() => {
       const botMsg = {
         from: "bot",
-        text: "Entendido! 💬 Estou processando sua solicitação...",
+        text: "Boa noite, Michel. \n Hoje os teus gastos estão superiores ao teus ganhos, \n tencione diminuir mais... Se quiser posso lhe ajudar com isso",
       };
       setMessages((prev) => [...prev, botMsg]);
     }, 1000);
