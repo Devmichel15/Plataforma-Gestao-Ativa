@@ -18,6 +18,18 @@ body {
   padding: 20px;
 }
 
+nav{
+  width: 100%;
+  max-width: 680px;
+  margin-bottom: 20px;
+}
+
+nav img{
+  height: 40px;
+  width: 40px;
+  
+}
+
 /* ======= CABEÇALHO ======= */
 header {
   width: 100%;
