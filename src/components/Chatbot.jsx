@@ -1,45 +1,48 @@
 import { useState, useEffect } from "react";
-
+import { useFinanceData } from "../hooks/useFinanceData";
+import { useNavigate } from "react-router-dom";
+import "../styles/chatbot.css";
 
 function Chatbot() {
+  const {
+    mensagens,
+    setMensagens,
+    adicionarTransacao,
+    dadosCliente,
+    setDadosCliente,
+  } = useFinanceData();
+
+  const [inputValue, setInputValue] = useState("");
+  const [indicePergunta, setIndicePergunta] = useState(0);
+  const [modoOnboarding, setModoOnboarding] = useState(!dadosCliente);
+  const navigate = useNavigate();
+
   const perguntasInicio = [
     "Qual é o seu nome?",
     "Em qual área você trabalha?",
-    "Quais são os seus objetivos para com o uso da Gestão Activa?",
+    "Quais são os seus objetivos com o uso da Gestão Activa?",
   ];
 
-  const [messages, setMessages] = useState([]);
-  const [inputValue, setInputValue] = useState("");
-  const [indicePergunta, setIndicePergunta] = useState(0);
-  const [modoOnboarding, setModoOnboarding] = useState(false);
-  const [respostas, setRespostas] = useState({});
-
-  // Quando o site carrega
   useEffect(() => {
-    const dadosSalvos = localStorage.getItem("dadosCliente");
-
-    if (dadosSalvos) {
-      const userData = JSON.parse(dadosSalvos);
-      setMessages([
-        {
-          from: "bot",
-          text: `Olá, ${userData.nome}! 👋 Bem-vindo de volta à Gestão Activa.`,
-        },
-        {
-          from: "bot",
-          text: "Posso te ajudar a acompanhar seus ganhos e despesas hoje?",
-        },
-      ]);
-    } else {
-      // Primeira visita → inicia perguntas
-      setModoOnboarding(true);
-      setMessages([
-        {
-          from: "bot",
-          text: "Olá! 👋 Sou o assistente virtual da Gestão Activa. Antes de começarmos, quero te conhecer melhor.",
-        },
-        { from: "bot", text: perguntasInicio[0] },
-      ]);
+    if (!mensagens.length) {
+      if (dadosCliente) {
+        setMensagens([
+          {
+            from: "bot",
+            text: `<i class="fi fi-sr-hand-wave"></i> Olá, ${dadosCliente.nome}! Bem-vindo de volta.`,
+          },
+          { from: "bot", text: "Como posso te ajudar hoje?" },
+        ]);
+      } else {
+        setMensagens([
+          {
+            from: "bot",
+            text: `<i class="fi fi-sr-hand-wave"></i> Olá! Sou o assistente virtual da Gestão Activa. Vamos nos conhecer melhor.`,
+          },
+          { from: "bot", text: perguntasInicio[0] },
+        ]);
+        setModoOnboarding(true);
+      }
     }
   }, []);
 
@@ -47,91 +50,120 @@ function Chatbot() {
     const trimmed = inputValue.trim();
     if (!trimmed) return;
 
-    const userMsg = { from: "user", text: trimmed };
-    setMessages((prev) => [...prev, userMsg]);
+    setMensagens((prev) => [...prev, { from: "user", text: trimmed }]);
     setInputValue("");
 
-    // Se estamos no modo de perguntas iniciais
+    // Onboarding (primeira vez)
     if (modoOnboarding) {
-      const chave =
-        indicePergunta === 0
-          ? "nome"
-          : indicePergunta === 1
-          ? "area"
-          : "objetivos";
+      const chaves = ["nome", "area", "objetivos"];
+      const chave = chaves[indicePergunta];
 
-      setRespostas((prev) => ({ ...prev, [chave]: trimmed }));
+      const novoCliente = { ...dadosCliente, [chave]: trimmed };
+      setDadosCliente(novoCliente);
 
-      const proximaPergunta = indicePergunta + 1;
-
-      setTimeout(() => {
-        if (proximaPergunta < perguntasInicio.length) {
-          setMessages((prev) => [
+      if (indicePergunta + 1 < perguntasInicio.length) {
+        setTimeout(() => {
+          setMensagens((prev) => [
             ...prev,
-            { from: "bot", text: perguntasInicio[proximaPergunta] },
+            { from: "bot", text: perguntasInicio[indicePergunta + 1] },
           ]);
-          setIndicePergunta(proximaPergunta);
-        } else {
-          // Finaliza o onboarding
-          localStorage.setItem(
-            "dadosCliente",
-            JSON.stringify({ ...respostas, [chave]: trimmed })
-          );
-
-          setMessages((prev) => [
+        }, 600);
+        setIndicePergunta(indicePergunta + 1);
+      } else {
+        setTimeout(() => {
+          setMensagens((prev) => [
             ...prev,
             {
               from: "bot",
-              text: `Perfeito, ${respostas.nome || trimmed}! 😊 Obrigado por compartilhar.`,
+              text: `<i class="fi fi-sr-badge-check"></i> Perfeito, ${novoCliente.nome}!`,
             },
             {
               from: "bot",
-              text: "Agora posso te ajudar com relatórios, despesas e muito mais. Como posso ajudar hoje?",
+              text: "Agora posso te ajudar a registrar ganhos e gastos ou mostrar teu dashboard.",
             },
           ]);
           setModoOnboarding(false);
-        }
-      }, 800);
-    } else {
-      // Resposta normal do bot
-      setTimeout(() => {
-        const botMsg = {
-          from: "bot",
-          text: "Boa noite, Michel. \nHoje os teus gastos estão superiores aos teus ganhos. \nTenciona diminuir mais? Posso te ajudar com isso.",
-        };
-        setMessages((prev) => [...prev, botMsg]);
-      }, 1000);
+        }, 800);
+      }
+      return;
     }
-  };
 
-  const handleKeyPress = (e) => {
-    if (e.key === "Enter") handleSendMessage();
+    // Comandos inteligentes (após onboarding)
+    const lower = trimmed.toLowerCase();
+
+    if (lower.includes("gastei") || lower.includes("gasto")) {
+      const valor = trimmed.match(/\d+/);
+      if (valor) adicionarTransacao("gasto", valor[0]);
+      else
+        setMensagens((p) => [
+          ...p,
+          { from: "bot", text: `<i class="fi fi-sr-comment-dollar"></i> Qual o valor do gasto?` },
+        ]);
+      return;
+    }
+
+    if (lower.includes("ganhei") || lower.includes("recebi")) {
+      const valor = trimmed.match(/\d+/);
+      if (valor) adicionarTransacao("ganho", valor[0]);
+      else
+        setMensagens((p) => [
+          ...p,
+          { from: "bot", text: `<i class="fi fi-sr-money"></i> Qual foi o valor do ganho?` },
+        ]);
+      return;
+    }
+
+    if (lower.includes("dashboard") || lower.includes("painel")) {
+      setMensagens((prev) => [
+        ...prev,
+        { from: "bot", text: `<i class="fi fi-sr-link-alt"></i> A abrir o teu dashboard...` },
+      ]);
+      setTimeout(() => navigate("/dashboard"), 1000);
+      return;
+    }
+
+    setMensagens((prev) => [
+      ...prev,
+      {
+        from: "bot",
+        text:
+          `<i class="fi fi-sr-info"></i> Posso registrar ganhos e gastos ou te levar ao dashboard. ` +
+          `Ex: 'Ganhei 10000' ou 'Abrir dashboard'.`,
+      },
+    ]);
   };
 
   return (
     <div className="app">
-      <header>
-        <h1>🤖 Chatbot — Gestão Activa</h1>
+      <header className="header">
+        <i className="fi fi-sr-robot"></i> Chatbot — Gestão Ativa
+        <button onClick={() => navigate("/")}>
+          <i className="fi fi-sr-home"></i> Início
+        </button>
       </header>
 
       <main className="container-messages">
         <div className="messages">
-          {messages.map((msg, index) => (
-            <div key={index} className={msg.from === "user" ? "user" : "bot"}>
-              {msg.text}
-            </div>
+          {mensagens.map((msg, i) => (
+            <div
+              key={i}
+              className={msg.from === "user" ? "user" : "bot"}
+              dangerouslySetInnerHTML={{ __html: msg.text }}
+            />
           ))}
         </div>
 
         <div className="form-messages">
           <input
             type="text"
-            placeholder="Escreva algo..."
+            placeholder="Digite aqui..."
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={handleKeyPress}
+            onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
           />
-          <button onClick={handleSendMessage}>Enviar</button>
+          <button onClick={handleSendMessage}>
+            <i className="fi fi-sr-paper-plane"></i>
+          </button>
         </div>
       </main>
     </div>

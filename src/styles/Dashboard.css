@@ -1,0 +1,252 @@
+/* ========== BASE E RESET ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: linear-gradient(135deg, #0a0a0d 0%, #151015 100%);
+  color: #fff;
+}
+
+/* ========== CONTAINER PRINCIPAL ========== */
+.dashboard {
+  max-width: 950px;
+  margin: 120px auto 60px;
+  padding: 40px;
+  background: rgba(20, 20, 25, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 18px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* ========== HEADER ========== */
+.dashboard header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 20px;
+}
+
+.dashboard header h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.6rem;
+  background: linear-gradient(90deg, #b55cff, #ff6b00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dashboard header button {
+  background: linear-gradient(90deg, #b55cff, #ff6b00);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.dashboard header button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(255, 128, 0, 0.4);
+}
+
+/* ========== RESUMO ========== */
+.resumo {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 25px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.resumo p {
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 12px 20px;
+  border-radius: 10px;
+}
+
+.resumo strong {
+  color: #ff6b00;
+}
+
+/* ========== FORMULÁRIO DE ADIÇÃO ========== */
+.form-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 24px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  align-items: center;
+  justify-content: center;
+}
+
+.form-add select,
+.form-add input {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+  font-size: 0.95rem;
+  width: 200px;
+  transition: 0.3s;
+}
+
+.form-add select:focus,
+.form-add input:focus {
+  border-color: #b55cff;
+  box-shadow: 0 0 8px rgba(181, 92, 255, 0.4);
+  outline: none;
+}
+
+/* ===== SELECT MELHORADO ===== */
+.form-add select {
+  position: relative;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ffffff' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.form-add select:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-color: #ff6b00;
+}
+
+.form-add select:focus {
+  border-color: #b55cff;
+  box-shadow: 0 0 10px rgba(181, 92, 255, 0.3);
+}
+
+.form-add option {
+  background-color: #1c1c24;
+  color: #fff;
+}
+
+/* ===== BOTÃO ===== */
+.form-add button {
+  background: linear-gradient(90deg, #b55cff, #ff6b00);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  padding: 12px 20px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: 0.3s;
+}
+
+.form-add button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px rgba(255, 107, 0, 0.5);
+}
+
+/* ========== LISTA DE TRANSAÇÕES ========== */
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 24px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  overflow-y: auto;
+  max-height: 400px;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-radius: 12px;
+  transition: 0.3s ease;
+  font-size: 0.95rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: scale(1.01);
+}
+
+.item span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Estilos específicos para ganhos e gastos */
+.item.ganho {
+  border-left: 4px solid #6a1b9a;
+}
+
+.item.gasto {
+  border-left: 4px solid #ff6b00;
+}
+
+/* ========== SCROLLBAR ESTILIZADA ========== */
+.lista::-webkit-scrollbar {
+  width: 6px;
+}
+.lista::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #b55cff, #ff6b00);
+  border-radius: 10px;
+}
+
+/* ========== RESPONSIVIDADE ========== */
+@media (max-width: 768px) {
+  .dashboard {
+    margin: 90px 16px;
+    padding: 24px;
+    gap: 24px;
+  }
+
+  .dashboard header h2 {
+    font-size: 1.3rem;
+  }
+
+  .form-add select,
+  .form-add input {
+    width: 100%;
+  }
+
+  .resumo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}
