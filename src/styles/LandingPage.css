@@ -21,13 +21,6 @@ body {
   background: var(--black);
   color: var(--white);
   font-family: "Inter", system-ui, sans-serif;
-  line-height: 1.6;
-}
-
-/* Layout container */
-.landing {
-  width: 100%;
-  overflow-x: hidden;
 }
 
 /* ===========================
@@ -97,7 +90,6 @@ nav i {
   font-size: 1.1rem;
 }
 
-
 /* Botão do Header */
 .btn-nav {
   background: var(--purple);
@@ -127,19 +119,27 @@ nav i {
   margin: 0 auto;
   flex-wrap: wrap;
   gap: 40px;
+  width: 100%;
+  flex-direction: column;
+  text-align: center;
+  padding-top: 120px;
 }
 
 .hero-text {
   flex: 1;
   min-width: 300px;
+  align-items: center;
+  text-align: center;
 }
 
 .hero-text h2 {
-  font-size: 2.8rem;
+  font-size: 2.5rem;
   line-height: 1.1;
   font-weight: 800;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+  text-align: center;
 }
+
 
 .hero-text h2 span {
   color: var(--purple);
@@ -148,14 +148,18 @@ nav i {
 .hero-text p {
   color: var(--text-gray);
   max-width: 500px;
+  width: 100%;
   margin-bottom: 32px;
   font-size: 1.1rem;
+  text-align: center;
+  margin: 0 auto 28px auto;
 }
 
 .hero-buttons {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+  justify-content: center;
 }
 
 .btn-primary {
@@ -196,6 +200,7 @@ nav i {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 30px;
 }
 
 .hero-visual .mockup {
@@ -241,28 +246,10 @@ nav i {
 /* ===========================
    RESPONSIVIDADE
    =========================== */
-@media (max-width: 1024px) {
-  .hero {
-    flex-direction: column;
-    text-align: center;
-    padding-top: 120px;
-  }
 
-  .hero-text p {
-    margin: 0 auto 28px auto;
-  }
-
-  .hero-buttons {
-    justify-content: center;
-  }
-
-  .nav {
-    gap: 18px;
-  }
-}
 
 @media (max-width: 700px) {
-  .nav {
+  .nav{
     display: none;
   }
 

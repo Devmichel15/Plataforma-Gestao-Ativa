@@ -101,15 +101,15 @@ header h1 {
   backdrop-filter: blur(8px);
 }
 
-input {
+.inputText {
   flex: 1;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 10px;
   padding: 10px 14px;
   color: #fff;
   font-size: 1rem;
   outline: none;
+  border: 1px solid transparent;
 }
 
 input:focus {
@@ -118,7 +118,7 @@ input:focus {
 }
 
 button {
-  padding: 10px 20px;
+  padding: 7px 16px;
   background: linear-gradient(90deg, #a445f7, #ff8800);
   border: none;
   color: #fff;
@@ -126,6 +126,11 @@ button {
   cursor: pointer;
   font-weight: 600;
   transition: all 0.2s ease;
+}
+
+#send-button{
+  height: 55px;
+  margin-top: 5px;
 }
 
 button:hover {

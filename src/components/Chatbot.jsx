@@ -155,13 +155,14 @@ function Chatbot() {
 
         <div className="form-messages">
           <input
+            className="inputText"
             type="text"
             placeholder="Digite aqui..."
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
           />
-          <button onClick={handleSendMessage}>
+          <button id="send-button" onClick={handleSendMessage}>
             <i className="fi fi-sr-paper-plane"></i>
           </button>
         </div>
