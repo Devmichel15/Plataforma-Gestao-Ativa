@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { useFinanceData } from "../hooks/useFinanceData";
 import { useNavigate } from "react-router-dom";
+import { Pie } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import "../styles/Dashboard.css";
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 function Dashboard() {
   const { transacoes, adicionarTransacao, setMensagens } = useFinanceData();
@@ -17,9 +21,14 @@ function Dashboard() {
     .filter((t) => t.tipo === "gasto")
     .reduce((acc, t) => acc + t.valor, 0);
 
+  const totalGeral = totalGanhos + totalGastos;
+  const percentGanhos = totalGeral ? ((totalGanhos / totalGeral) * 100).toFixed(1) : 0;
+  const percentGastos = totalGeral ? ((totalGastos / totalGeral) * 100).toFixed(1) : 0;
+
   const handleAdd = () => {
     if (!valor) return alert("Digite um valor");
-    adicionarTransacao(tipo, valor, descricao);
+    // usar o adicionarTransacao do hook (mantendo lógica centralizada)
+    adicionarTransacao(tipo, Number(valor), descricao || "Sem descrição");
     setMensagens((prev) => [
       ...prev,
       {
@@ -29,6 +38,29 @@ function Dashboard() {
     ]);
     setValor("");
     setDescricao("");
+  };
+
+  const data = {
+    labels: ["Ganhos", "Gastos"],
+    datasets: [
+      {
+        data: [totalGanhos, totalGastos],
+        backgroundColor: ["#00c46a", "#ff4d4d"],
+        borderColor: ["#111", "#111"],
+        borderWidth: 2,
+      },
+    ],
+  };
+
+  const options = {
+    plugins: {
+      legend: {
+        labels: {
+          color: "#fff",
+          font: { size: 14 },
+        },
+      },
+    },
   };
 
   return (
@@ -80,20 +112,36 @@ function Dashboard() {
       </div>
 
       <div className="lista">
-        {transacoes.map((t) => (
-          <div key={t.id} className={`item ${t.tipo}`}>
-            <span>
-              {t.tipo === "ganho" ? (
-                <i className="fi fi-sr-arrow-trend-up"></i>
-              ) : (
-                <i className="fi fi-sr-arrow-trend-down"></i>
-              )}{" "}
-              {t.descricao}
-            </span>
-            <span>{t.valor} kz</span>
-            <small>{t.data}</small>
-          </div>
-        ))}
+        {transacoes && transacoes.length ? (
+          transacoes.map((t) => (
+            <div key={t.id} className={`item ${t.tipo}`}>
+              <span>
+                {t.tipo === "ganho" ? (
+                  <i className="fi fi-sr-arrow-trend-up"></i>
+                ) : (
+                  <i className="fi fi-sr-arrow-trend-down"></i>
+                )}{" "}
+                {t.descricao}
+              </span>
+              <span>{t.valor} kz</span>
+              <small>{t.data}</small>
+            </div>
+          ))
+        ) : (
+          <p style={{ textAlign: "center", color: "rgba(255,255,255,0.7)" }}>
+            Nenhuma transação ainda.
+          </p>
+        )}
+      </div>
+
+      {/* === GRÁFICO DE PIZZA === */}
+      <div className="grafico">
+        <h3>Distribuição Financeira</h3>
+        <Pie data={data} options={options} />
+        <p>
+          <span style={{ color: "#00c46a" }}>Ganhos:</span> {percentGanhos}% |{" "}
+          <span style={{ color: "#ff4d4d" }}>Gastos:</span> {percentGastos}%
+        </p>
       </div>
     </div>
   );

@@ -33,6 +33,7 @@ body {
   justify-content: space-between;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding-bottom: 20px;
+  /* REMOVIDO margin-top excessivo que escondia conteúdo */
 }
 
 .dashboard header h2 {
@@ -223,6 +224,25 @@ body {
   border-radius: 10px;
 }
 
+.grafico {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.grafico h3 {
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.grafico canvas {
+  max-width: 300px;
+  margin: 0 auto;
+}
+
 /* ========== RESPONSIVIDADE ========== */
 @media (max-width: 768px) {
   .dashboard {
@@ -231,6 +251,7 @@ body {
     gap: 24px;
   }
 
+  /* removido margin-top pesado aqui também */
   .dashboard header h2 {
     font-size: 1.3rem;
   }

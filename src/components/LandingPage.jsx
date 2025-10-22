@@ -31,7 +31,7 @@ function LandingPage() {
         </div>
 
         <nav className="nav">
-          <button className="btn-nav" onClick={irParaChat}>
+          <button className="btn-nav" onClick={irParaLogin}>
             Entrar
           </button>
         </nav>

@@ -14,7 +14,7 @@ function Chatbot() {
 
   const [inputValue, setInputValue] = useState("");
   const [indicePergunta, setIndicePergunta] = useState(0);
-  const [modoOnboarding, setModoOnboarding] = useState(!dadosCliente);
+  const [modoOnboarding, setModoOnboarding] = useState(!dadosCliente?.nome);
   const navigate = useNavigate();
 
   const perguntasInicio = [
@@ -23,9 +23,10 @@ function Chatbot() {
     "Quais são os seus objetivos com o uso da Gestão Activa?",
   ];
 
+  // Exibe mensagens iniciais
   useEffect(() => {
     if (!mensagens.length) {
-      if (dadosCliente) {
+      if (dadosCliente?.nome) {
         setMensagens([
           {
             from: "bot",
@@ -46,18 +47,17 @@ function Chatbot() {
     }
   }, []);
 
+  // Enviar mensagem
   const handleSendMessage = () => {
     const trimmed = inputValue.trim();
     if (!trimmed) return;
-
     setMensagens((prev) => [...prev, { from: "user", text: trimmed }]);
     setInputValue("");
 
-    // Onboarding (primeira vez)
+    // === MODO ONBOARDING ===
     if (modoOnboarding) {
       const chaves = ["nome", "area", "objetivos"];
       const chave = chaves[indicePergunta];
-
       const novoCliente = { ...dadosCliente, [chave]: trimmed };
       setDadosCliente(novoCliente);
 
@@ -88,47 +88,72 @@ function Chatbot() {
       return;
     }
 
-    // Comandos inteligentes (após onboarding)
+    // === COMANDOS ===
     const lower = trimmed.toLowerCase();
 
+    // Registrar gasto
     if (lower.includes("gastei") || lower.includes("gasto")) {
       const valor = trimmed.match(/\d+/);
-      if (valor) adicionarTransacao("gasto", valor[0]);
-      else
+      if (valor) {
+        adicionarTransacao("gasto", Number(valor[0]), "Sem descrição");
         setMensagens((p) => [
           ...p,
-          { from: "bot", text: `<i class="fi fi-sr-comment-dollar"></i> Qual o valor do gasto?` },
+          { from: "bot", text: `📉 Gasto de ${valor[0]} kz registrado.` },
         ]);
+      } else {
+        setMensagens((p) => [
+          ...p,
+          {
+            from: "bot",
+            text: `<i class="fi fi-sr-comment-dollar"></i> Qual o valor do gasto?`,
+          },
+        ]);
+      }
       return;
     }
 
+    // Registrar ganho
     if (lower.includes("ganhei") || lower.includes("recebi")) {
       const valor = trimmed.match(/\d+/);
-      if (valor) adicionarTransacao("ganho", valor[0]);
-      else
+      if (valor) {
+        adicionarTransacao("ganho", Number(valor[0]), "Sem descrição");
         setMensagens((p) => [
           ...p,
-          { from: "bot", text: `<i class="fi fi-sr-money"></i> Qual foi o valor do ganho?` },
+          { from: "bot", text: `💰 Ganho de ${valor[0]} kz registrado.` },
         ]);
+      } else {
+        setMensagens((p) => [
+          ...p,
+          {
+            from: "bot",
+            text: `<i class="fi fi-sr-money"></i> Qual foi o valor do ganho?`,
+          },
+        ]);
+      }
       return;
     }
 
+    // Abrir dashboard
     if (lower.includes("dashboard") || lower.includes("painel")) {
       setMensagens((prev) => [
         ...prev,
-        { from: "bot", text: `<i class="fi fi-sr-link-alt"></i> A abrir o teu dashboard...` },
+        {
+          from: "bot",
+          text: `<i class="fi fi-sr-link-alt"></i> A abrir o teu dashboard...`,
+        },
       ]);
       setTimeout(() => navigate("/dashboard"), 1000);
       return;
     }
 
+    // Resposta padrão
     setMensagens((prev) => [
       ...prev,
       {
         from: "bot",
         text:
-          `<i class="fi fi-sr-info"></i> Posso registrar ganhos e gastos ou te levar ao dashboard. ` +
-          `Ex: 'Ganhei 10000' ou 'Abrir dashboard'.`,
+          `<i class="fi fi-sr-info"></i> Posso registrar ganhos e gastos, mostrar teu dashboard, fazer uma análise ou dar uma dica.<br>` +
+          `Ex: <em>“Ganhei 10000”</em> ou <em>“Mostra meu resumo financeiro”</em>.`,
       },
     ]);
   };

@@ -137,3 +137,51 @@ button:hover {
   transform: scale(1.05);
   box-shadow: 0 0 12px rgba(255, 136, 0, 0.4);
 }
+
+.msg {
+  animation: fadeUp 0.4s ease-out;
+}
+
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.quick-replies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px;
+  justify-content: center;
+}
+
+.quick-replies button {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-size: 0.9rem;
+}
+
+.quick-replies button:hover {
+  background: #00c46a;
+  color: #000;
+}
+
+.controls button {
+  background: transparent;
+  color: #fff;
+  border: none;
+  margin-left: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+}
