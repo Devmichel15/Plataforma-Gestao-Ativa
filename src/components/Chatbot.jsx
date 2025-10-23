@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useFinanceData } from "../hooks/useFinanceData";
 import { useNavigate } from "react-router-dom";
 import "../styles/chatbot.css";
@@ -10,11 +10,14 @@ function Chatbot() {
     adicionarTransacao,
     dadosCliente,
     setDadosCliente,
+    transacoes,
   } = useFinanceData();
 
   const [inputValue, setInputValue] = useState("");
   const [indicePergunta, setIndicePergunta] = useState(0);
   const [modoOnboarding, setModoOnboarding] = useState(!dadosCliente?.nome);
+  const [notificacao, setNotificacao] = useState(null);
+  const messagesEndRef = useRef(null);
   const navigate = useNavigate();
 
   const perguntasInicio = [
@@ -23,22 +26,22 @@ function Chatbot() {
     "Quais são os seus objetivos com o uso da Gestão Activa?",
   ];
 
-  // Exibe mensagens iniciais
+  /* === MENSAGENS INICIAIS === */
   useEffect(() => {
     if (!mensagens.length) {
       if (dadosCliente?.nome) {
         setMensagens([
+          { from: "bot", text: `👋 Olá, ${dadosCliente.nome}!` },
           {
             from: "bot",
-            text: `<i class="fi fi-sr-hand-wave"></i> Olá, ${dadosCliente.nome}! Bem-vindo de volta.`,
+            text: "Sou o Gestor Ativo — teu consultor virtual. Vamos aumentar os teus lucros hoje?",
           },
-          { from: "bot", text: "Como posso te ajudar hoje?" },
         ]);
       } else {
         setMensagens([
           {
             from: "bot",
-            text: `<i class="fi fi-sr-hand-wave"></i> Olá! Sou o assistente virtual da Gestão Activa. Vamos nos conhecer melhor.`,
+            text: `👋 Olá! Sou o <b>Gestor Ativo</b>, teu assistente virtual da Gestão Activa.`,
           },
           { from: "bot", text: perguntasInicio[0] },
         ]);
@@ -47,14 +50,52 @@ function Chatbot() {
     }
   }, []);
 
-  // Enviar mensagem
+  /* === SCROLL AUTOMÁTICO === */
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [mensagens]);
+
+  /* === AJUSTE MOBILE === */
+  useEffect(() => {
+    const handleResize = () => {
+      const isKeyboardOpen = window.innerHeight < window.outerHeight - 150;
+      document.body.classList.toggle("keyboard-open", isKeyboardOpen);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  /* === SOM SEM ARQUIVO (Web Audio API) === */
+  const tocarSom = () => {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      gain.gain.setValueAtTime(0.05, ctx.currentTime); // volume suave
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.15);
+    } catch {}
+  };
+
+  /* === MOSTRAR NOTIFICAÇÃO === */
+  const mostrarNotificacao = (msg) => {
+    setNotificacao(msg);
+    tocarSom();
+    setTimeout(() => setNotificacao(null), 4000);
+  };
+
+  /* === ENVIAR MENSAGEM === */
   const handleSendMessage = () => {
     const trimmed = inputValue.trim();
     if (!trimmed) return;
     setMensagens((prev) => [...prev, { from: "user", text: trimmed }]);
     setInputValue("");
 
-    // === MODO ONBOARDING ===
+    // === ONBOARDING ===
     if (modoOnboarding) {
       const chaves = ["nome", "area", "objetivos"];
       const chave = chaves[indicePergunta];
@@ -73,13 +114,14 @@ function Chatbot() {
         setTimeout(() => {
           setMensagens((prev) => [
             ...prev,
+            { from: "bot", text: `✅ Perfeito, ${novoCliente.nome}!` },
             {
               from: "bot",
-              text: `<i class="fi fi-sr-badge-check"></i> Perfeito, ${novoCliente.nome}!`,
+              text: "Agora posso registrar ganhos, gastos e gerar relatórios inteligentes.",
             },
             {
               from: "bot",
-              text: "Agora posso te ajudar a registrar ganhos e gastos ou mostrar teu dashboard.",
+              text: `💡 Dica: diga <b>“Quero minha análise financeira”</b> ou <b>“Resumo do mês”</b>.`,
             },
           ]);
           setModoOnboarding(false);
@@ -88,10 +130,9 @@ function Chatbot() {
       return;
     }
 
-    // === COMANDOS ===
     const lower = trimmed.toLowerCase();
 
-    // Registrar gasto
+    // === GASTO ===
     if (lower.includes("gastei") || lower.includes("gasto")) {
       const valor = trimmed.match(/\d+/);
       if (valor) {
@@ -100,19 +141,17 @@ function Chatbot() {
           ...p,
           { from: "bot", text: `📉 Gasto de ${valor[0]} kz registrado.` },
         ]);
+        mostrarNotificacao(`💸 Gasto de <b>${valor[0]} kz</b> adicionado.`);
       } else {
         setMensagens((p) => [
           ...p,
-          {
-            from: "bot",
-            text: `<i class="fi fi-sr-comment-dollar"></i> Qual o valor do gasto?`,
-          },
+          { from: "bot", text: `💬 Qual o valor do gasto?` },
         ]);
       }
       return;
     }
 
-    // Registrar ganho
+    // === GANHO ===
     if (lower.includes("ganhei") || lower.includes("recebi")) {
       const valor = trimmed.match(/\d+/);
       if (valor) {
@@ -121,50 +160,109 @@ function Chatbot() {
           ...p,
           { from: "bot", text: `💰 Ganho de ${valor[0]} kz registrado.` },
         ]);
+        mostrarNotificacao(`📈 Ganho de <b>${valor[0]} kz</b> adicionado.`);
       } else {
         setMensagens((p) => [
           ...p,
-          {
-            from: "bot",
-            text: `<i class="fi fi-sr-money"></i> Qual foi o valor do ganho?`,
-          },
+          { from: "bot", text: `💬 Qual foi o valor do ganho?` },
         ]);
       }
       return;
     }
 
-    // Abrir dashboard
+    // === ANÁLISE ===
+    if (lower.includes("análise") || lower.includes("resumo")) {
+      gerarAnaliseInteligente();
+      return;
+    }
+
+    // === DASHBOARD ===
     if (lower.includes("dashboard") || lower.includes("painel")) {
       setMensagens((prev) => [
         ...prev,
-        {
-          from: "bot",
-          text: `<i class="fi fi-sr-link-alt"></i> A abrir o teu dashboard...`,
-        },
+        { from: "bot", text: `🔗 A abrir o teu dashboard...` },
       ]);
       setTimeout(() => navigate("/dashboard"), 1000);
       return;
     }
 
-    // Resposta padrão
+    // === PADRÃO ===
     setMensagens((prev) => [
       ...prev,
       {
         from: "bot",
         text:
-          `<i class="fi fi-sr-info"></i> Posso registrar ganhos e gastos, mostrar teu dashboard, fazer uma análise ou dar uma dica.<br>` +
-          `Ex: <em>“Ganhei 10000”</em> ou <em>“Mostra meu resumo financeiro”</em>.`,
+          `ℹ️ Posso registrar ganhos e gastos, mostrar teu dashboard ou fazer uma <b>análise</b>.<br>` +
+          `Ex: <em>“Ganhei 15000”</em> ou <em>“Faz uma análise do mês”</em>.`,
       },
     ]);
   };
 
+  /* === ANÁLISE === */
+  const gerarAnaliseInteligente = () => {
+    if (!transacoes.length) {
+      setMensagens((prev) => [
+        ...prev,
+        {
+          from: "bot",
+          text:
+            `📊 Ainda não tens dados suficientes para análise.<br>` +
+            `Registra alguns ganhos e gastos primeiro.`,
+        },
+      ]);
+      return;
+    }
+
+    const ganhos = transacoes
+      .filter((t) => t.tipo === "ganho")
+      .reduce((acc, cur) => acc + cur.valor, 0);
+    const gastos = transacoes
+      .filter((t) => t.tipo === "gasto")
+      .reduce((acc, cur) => acc + cur.valor, 0);
+    const saldo = ganhos - gastos;
+    const tendencia =
+      saldo > 0 ? "🟢 Lucro" : saldo < 0 ? "🔴 Prejuízo" : "🟡 Equilíbrio";
+
+    const analise = `
+      <div class="analise-card">
+        <h4>📈 Resumo Financeiro</h4>
+        <p>💰 Ganhos: <b>${ganhos.toLocaleString()} kz</b></p>
+        <p>📉 Gastos: <b>${gastos.toLocaleString()} kz</b></p>
+        <p>📊 Saldo: <b>${saldo.toLocaleString()} kz</b></p>
+        <p>Status atual: ${tendencia}</p>
+      </div>
+    `;
+
+    const dica =
+      saldo > 0
+        ? "Excelente! Considere reinvestir parte dos lucros."
+        : saldo < 0
+        ? "Atenção! Os gastos ultrapassam os ganhos. Reveja custos fixos."
+        : "Equilíbrio atingido! Agora é hora de crescer receitas.";
+
+    setMensagens((prev) => [
+      ...prev,
+      { from: "bot", text: analise },
+      { from: "bot", text: `💡 ${dica}` },
+    ]);
+
+    if (saldo < 500) {
+      mostrarNotificacao(`⚠️ O teu saldo está abaixo de <b>500 kz</b>!`);
+    }
+  };
+
   return (
     <div className="app">
+      {notificacao && (
+        <div
+          className="notification-popup"
+          dangerouslySetInnerHTML={{ __html: notificacao }}
+        />
+      )}
+
       <header className="header">
-        <i className="fi fi-sr-robot"></i> Chatbot — Gestão Ativa
-        <button onClick={() => navigate("/")}>
-          <i className="fi fi-sr-home"></i> Início
-        </button>
+        <h1>🤖 Gestor Ativo — Chat de Gestão</h1>
+        <button onClick={() => navigate("/")}>🏠 Início</button>
       </header>
 
       <main className="container-messages">
@@ -172,10 +270,11 @@ function Chatbot() {
           {mensagens.map((msg, i) => (
             <div
               key={i}
-              className={msg.from === "user" ? "user" : "bot"}
+              className={`msg ${msg.from === "user" ? "user" : "bot"}`}
               dangerouslySetInnerHTML={{ __html: msg.text }}
             />
           ))}
+          <div ref={messagesEndRef} />
         </div>
 
         <div className="form-messages">
@@ -188,7 +287,7 @@ function Chatbot() {
             onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
           />
           <button id="send-button" onClick={handleSendMessage}>
-            <i className="fi fi-sr-paper-plane"></i>
+            ➤
           </button>
         </div>
       </main>

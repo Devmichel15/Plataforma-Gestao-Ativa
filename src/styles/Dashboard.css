@@ -9,12 +9,20 @@
 body {
   background: linear-gradient(135deg, #0a0a0d 0%, #151015 100%);
   color: #fff;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+}
+.btn-back {
+  padding: 10px 16px;
+  font-weight: 500;
+  width: 100px;
 }
 
 /* ========== CONTAINER PRINCIPAL ========== */
 .dashboard {
   max-width: 950px;
-  margin: 120px auto 60px;
+  margin: 120px auto 60px; /* espaço pro header fixo */
   padding: 40px;
   background: rgba(20, 20, 25, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -24,45 +32,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 40px;
-}
-
-/* ========== HEADER ========== */
-.dashboard header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  padding-bottom: 20px;
-  /* REMOVIDO margin-top excessivo que escondia conteúdo */
-}
-
-.dashboard header h2 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 1.6rem;
-  background: linear-gradient(90deg, #b55cff, #ff6b00);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.dashboard header button {
-  background: linear-gradient(90deg, #b55cff, #ff6b00);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 18px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  transition: 0.3s ease;
-}
-
-.dashboard header button:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 15px rgba(255, 128, 0, 0.4);
 }
 
 /* ========== RESUMO ========== */
@@ -75,6 +44,7 @@ body {
   padding: 25px;
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-top: 300px;
 }
 
 .resumo p {
@@ -126,7 +96,6 @@ body {
 
 /* ===== SELECT MELHORADO ===== */
 .form-add select {
-  position: relative;
   appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ffffff' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -139,11 +108,6 @@ body {
 .form-add select:hover {
   background-color: rgba(255, 255, 255, 0.06);
   border-color: #ff6b00;
-}
-
-.form-add select:focus {
-  border-color: #b55cff;
-  box-shadow: 0 0 10px rgba(181, 92, 255, 0.3);
 }
 
 .form-add option {
@@ -206,7 +170,6 @@ body {
   gap: 8px;
 }
 
-/* Estilos específicos para ganhos e gastos */
 .item.ganho {
   border-left: 4px solid #6a1b9a;
 }
@@ -215,7 +178,7 @@ body {
   border-left: 4px solid #ff6b00;
 }
 
-/* ========== SCROLLBAR ESTILIZADA ========== */
+/* ========== SCROLLBAR ========== */
 .lista::-webkit-scrollbar {
   width: 6px;
 }
@@ -224,12 +187,13 @@ body {
   border-radius: 10px;
 }
 
+/* ========== GRÁFICO ========== */
 .grafico {
   background: rgba(255, 255, 255, 0.05);
   border-radius: 12px;
   padding: 20px;
-  margin: 20px 0;
   text-align: center;
+  margin: 20px 0;
 }
 
 .grafico h3 {
@@ -245,25 +209,32 @@ body {
 
 /* ========== RESPONSIVIDADE ========== */
 @media (max-width: 768px) {
-  .dashboard {
-    margin: 90px 16px;
-    padding: 24px;
-    gap: 24px;
+  header {
+    padding: 16px 20px;
+    flex-direction: column;
+    gap: 10px;
   }
 
-  /* removido margin-top pesado aqui também */
-  .dashboard header h2 {
+  header h2 {
     font-size: 1.3rem;
   }
 
-  .form-add select,
-  .form-add input {
-    width: 100%;
+  .dashboard {
+    margin: 110px 16px 60px;
+    padding: 12px;
+    gap: 24px;
   }
 
   .resumo {
     flex-direction: column;
     align-items: flex-start;
+    margin-top: 500px;
+    width: 100%;
+  }
+
+  .form-add select,
+  .form-add input {
+    width: 100%;
   }
 
   .item {

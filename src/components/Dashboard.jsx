@@ -22,8 +22,12 @@ function Dashboard() {
     .reduce((acc, t) => acc + t.valor, 0);
 
   const totalGeral = totalGanhos + totalGastos;
-  const percentGanhos = totalGeral ? ((totalGanhos / totalGeral) * 100).toFixed(1) : 0;
-  const percentGastos = totalGeral ? ((totalGastos / totalGeral) * 100).toFixed(1) : 0;
+  const percentGanhos = totalGeral
+    ? ((totalGanhos / totalGeral) * 100).toFixed(1)
+    : 0;
+  const percentGastos = totalGeral
+    ? ((totalGastos / totalGeral) * 100).toFixed(1)
+    : 0;
 
   const handleAdd = () => {
     if (!valor) return alert("Digite um valor");
@@ -65,15 +69,6 @@ function Dashboard() {
 
   return (
     <div className="dashboard">
-      <header>
-        <h2>
-          <i className="fi fi-sr-chart-histogram"></i> Dashboard — Gestão Activa
-        </h2>
-        <button onClick={() => navigate("/chatbot")}>
-          <i className="fi fi-sr-comments"></i> Chat
-        </button>
-      </header>
-
       <div className="resumo">
         <p>
           <i className="fi fi-sr-sack-dollar"></i> Ganhos:{" "}
@@ -133,7 +128,6 @@ function Dashboard() {
           </p>
         )}
       </div>
-
       {/* === GRÁFICO DE PIZZA === */}
       <div className="grafico">
         <h3>Distribuição Financeira</h3>
@@ -143,6 +137,7 @@ function Dashboard() {
           <span style={{ color: "#ff4d4d" }}>Gastos:</span> {percentGastos}%
         </p>
       </div>
+      <button className="btn-back" onClick={() => {navigate('/')}}> <i className="fi fi-sr-arrow-left"></i> Voltar</button>
     </div>
   );
 }
