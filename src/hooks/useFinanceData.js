@@ -1,116 +1,86 @@
 import { useState, useEffect } from "react";
 
 export function useFinanceData() {
-  // Carregar dados existentes do localStorage
+  // Carregar dados do localStorage
   const savedData = JSON.parse(localStorage.getItem("gestaoActivaData")) || {
     transacoes: [],
+    produtos: [],
     mensagens: [],
     dadosCliente: null,
   };
 
   const [transacoes, setTransacoes] = useState(savedData.transacoes);
+  const [produtos, setProdutos] = useState(savedData.produtos);
   const [mensagens, setMensagens] = useState(savedData.mensagens);
   const [dadosCliente, setDadosCliente] = useState(savedData.dadosCliente);
 
-  // Salvar automaticamente sempre que algo mudar
+  // Persistência automática
   useEffect(() => {
-    const data = { transacoes, mensagens, dadosCliente };
+    const data = { transacoes, produtos, mensagens, dadosCliente };
     localStorage.setItem("gestaoActivaData", JSON.stringify(data));
-  }, [transacoes, mensagens, dadosCliente]);
+  }, [transacoes, produtos, mensagens, dadosCliente]);
 
-  // === Função para adicionar transação ===
-  const adicionarTransacao = (tipo, valor, descricao = "Sem descrição") => {
+  // ======================
+  // 🔹 FUNÇÕES DE TRANSAÇÕES
+  // ======================
+  function adicionarTransacao(tipo, valor, descricao) {
     const nova = {
       id: Date.now(),
       tipo,
-      valor: Number(valor),
+      valor,
       descricao,
-      data: new Date().toLocaleString("pt-PT"),
+      data: new Date().toLocaleDateString("pt-PT"),
     };
+    setTransacoes((prev) => [nova, ...prev]);
+  }
 
-    setTransacoes((prev) => [...prev, nova]);
-    setMensagens((prev) => [
-      ...prev,
-      {
-        from: "bot",
-        text: `${
-          tipo === "ganho" ? "📈 Ganho" : "📉 Gasto"
-        } de ${valor} kz registrado com sucesso.`,
-      },
-    ]);
-  };
+  // ======================
+  // 🔹 FUNÇÕES DE PRODUTOS
+  // ======================
+  function adicionarProduto(nome, categoria, quantidade, preco) {
+    const novoProduto = {
+      id: Date.now(),
+      nome,
+      categoria,
+      quantidade: parseInt(quantidade),
+      preco: parseFloat(preco),
+      data: new Date().toLocaleDateString("pt-PT"),
+    };
+    setProdutos((prev) => [novoProduto, ...prev]);
+  }
 
-  // === Pegar nome do usuário do localStorage (para notificações personalizadas) ===
-  const nomeUsuario =
-    dadosCliente?.nome ||
-    JSON.parse(localStorage.getItem("gestaoActivaData"))?.dadosCliente?.nome ||
-    "usuário";
+  function removerProduto(id) {
+    setProdutos((prev) => prev.filter((p) => p.id !== id));
+  }
 
-  // === Análises automáticas e notificações inteligentes ===
-  useEffect(() => {
-    if (transacoes.length === 0) return;
+  // ======================
+  // 🔹 AGRUPAMENTO POR DATA
+  // ======================
+  const transacoesPorData = transacoes.reduce((acc, t) => {
+    if (!acc[t.data]) acc[t.data] = [];
+    acc[t.data].push(t);
+    return acc;
+  }, {});
 
-    const totalGanhos = transacoes
-      .filter((t) => t.tipo === "ganho")
-      .reduce((acc, t) => acc + t.valor, 0);
-
-    const totalGastos = transacoes
-      .filter((t) => t.tipo === "gasto")
-      .reduce((acc, t) => acc + t.valor, 0);
-
-    const saldo = totalGanhos - totalGastos;
-
-    if (saldo < 0) {
-      setMensagens((prev) => [
-        ...prev,
-        {
-          from: "bot",
-          text: `<i class="fi fi-sr-warning"></i> Atenção, ${nomeUsuario}! Seu saldo está negativo (${saldo} kz). É hora de rever os gastos.`,
-        },
-      ]);
-    } else if (saldo > 0 && saldo < 1000) {
-      setMensagens((prev) => [
-        ...prev,
-        {
-          from: "bot",
-          text: `<i class="fi fi-sr-piggy-bank"></i> ${nomeUsuario}, seu saldo atual é ${saldo} kz. Continue economizando, você está indo bem!`,
-        },
-      ]);
-    }
-  }, [transacoes]);
-
-  // === Lembretes automáticos por tempo ===
-  useEffect(() => {
-    const lastAccess = localStorage.getItem("lastAccess");
-    const now = Date.now();
-
-    // Se passou mais de 24h sem interação
-    if (!lastAccess || now - lastAccess > 1000 * 60 * 60 * 24) {
-      setMensagens((prev) => [
-        ...prev,
-        {
-          from: "bot",
-          text: `<i class="fi fi-sr-bell-ring"></i> Olá ${nomeUsuario}! Já faz um dia sem registrar suas finanças. Quer atualizar hoje?`,
-        },
-      ]);
-      localStorage.setItem("lastAccess", now);
-    }
-
-    // Atualiza o "lastAccess" a cada 10 minutos
-    const reminder = setInterval(() => {
-      localStorage.setItem("lastAccess", Date.now());
-    }, 1000 * 60 * 10);
-
-    return () => clearInterval(reminder);
-  }, [nomeUsuario]);
+  const produtosPorData = produtos.reduce((acc, p) => {
+    if (!acc[p.data]) acc[p.data] = [];
+    acc[p.data].push(p);
+    return acc;
+  }, {});
 
   return {
     transacoes,
-    setTransacoes,
+    produtos,
     mensagens,
-    setMensagens,
-    adicionarTransacao,
     dadosCliente,
+    setMensagens,
     setDadosCliente,
+    setTransacoes,
+    setProdutos,
+    adicionarTransacao,
+    adicionarProduto,
+    removerProduto,
+    transacoesPorData,
+    produtosPorData,
   };
 }

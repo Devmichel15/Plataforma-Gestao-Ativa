@@ -1,15 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import "../styles/Sign.css";
 import { useState, useEffect } from "react";
+import { useFinanceData } from "../hooks/useFinanceData";
 
 function Sign() {
   const navigate = useNavigate();
+  const { setDadosCliente } = useFinanceData();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [users, setUsers] = useState([]);
 
-  // 🔹 Carrega usuários salvos do localStorage ao iniciar
+  // 🔹 Carregar usuários do localStorage ao iniciar
   useEffect(() => {
     const usersData = localStorage.getItem("users");
     if (usersData) {
@@ -27,15 +29,29 @@ function Sign() {
 
     const newUser = { name, email };
     const updatedUsers = [...users, newUser];
-    setUsers(updatedUsers);
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
 
+    // 🔸 Salvar na lista geral de usuários
+    localStorage.setItem("users", JSON.stringify(updatedUsers));
+    setUsers(updatedUsers);
+
+    // 🔸 Atualizar dados do cliente atual (gestaoActivaData)
+    setDadosCliente(newUser);
+
+    // 🔸 Mensagem de confirmação
     setTimeout(() => {
       setName("");
       setEmail("");
       alert("Registo bem-sucedido!");
-      navigate("/");
-    }, 500);
+      navigate("/"); // voltar para a página principal
+    }, 600);
+  }
+
+  function handleLogout() {
+    localStorage.removeItem("gestaoActivaData");
+    localStorage.removeItem("users");
+    setUsers([]);
+    setDadosCliente(null);
+    alert("Sessão encerrada.");
   }
 
   return (
@@ -50,6 +66,9 @@ function Sign() {
                 <p><b>Email:</b> {user.email}</p>
               </div>
             ))}
+            <button type="button" className="btn-secondary" onClick={handleLogout}>
+              Terminar Sessão
+            </button>
           </div>
         ) : (
           <>

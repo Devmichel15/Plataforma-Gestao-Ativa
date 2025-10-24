@@ -1,0 +1,235 @@
+.produtos-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a0d 0%, #151015 100%);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 120px;
+  color: #fff;
+}
+
+.produtos-card {
+  width: 90%;
+  max-width: 950px;
+  background: rgba(20, 20, 25, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 18px;
+  padding: 40px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  margin-top: 300px;
+}
+
+.btn-voltar {
+  background: linear-gradient(90deg, #b55cff, #ff6b00);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  padding: 10px 16px;
+  font-weight: 500;
+  width: fit-content;
+  transition: 0.3s;
+  text-decoration: none;
+}
+.btn-voltar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px rgba(255, 107, 0, 0.4);
+}
+
+.descricao {
+  opacity: 0.8;
+  font-size: 0.95rem;
+}
+
+/* === RESUMO === */
+.resumo-produtos {
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.resumo-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.resumo-item strong {
+  color: #ff6b00;
+  font-size: 1.2rem;
+}
+
+/* === FORM === */
+.form-produtos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 24px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.form-produtos input {
+  flex: 1;
+  min-width: 180px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+input:focus {
+  outline: none;
+  border-color: #ff6b00;
+  box-shadow: 0 0 8px rgba(255, 107, 0, 0.4);
+}
+
+.form-produtos button {
+  background: linear-gradient(90deg, #b55cff, #ff6b00);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  padding: 12px 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.form-produtos button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 12px rgba(255, 107, 0, 0.5);
+}
+
+/* === BUSCA === */
+.busca {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+}
+/* === LISTA DE PRODUTOS === */
+.lista-produtos {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 24px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+
+  /* ===== NOVO ===== */
+  max-height: 50vh;   /* altura máxima proporcional à tela */
+  overflow-y: auto;   /* ativa scroll vertical */
+  flex-grow: 1;       /* ocupa espaço disponível */
+}
+
+/* Scroll visual */
+.lista-produtos::-webkit-scrollbar {
+  width: 6px;
+}
+
+.lista-produtos::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #b55cff, #ff6b00); /* roxo e laranja */
+  border-radius: 10px;
+}
+
+/* Agrupamento por data */
+.grupo-data {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.data-titulo {
+  color: #b55cff; /* roxo */
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-left: 4px solid #ff6b00; /* laranja */
+  padding-left: 10px;
+  margin-bottom: 8px;
+  opacity: 0.9;
+}
+
+/* Item de produto */
+.produto-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 14px 18px;
+  border-radius: 12px;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.produto-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: scale(1.01);
+}
+
+/* Info dentro do item */
+.info {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.info strong {
+  color: #fff;
+}
+
+.info span.preco {
+  color: #ff6b00; /* laranja para preço */
+  font-weight: 600;
+}
+
+/* Botão remover */
+.btn-remover {
+  background: transparent;
+  border: none;
+  color: #ff6b00;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: transform 0.3s, color 0.3s;
+}
+
+.btn-remover:hover {
+  transform: scale(1.1);
+  color: #ff8640;
+}
+
+/* Mensagem vazio */
+.vazio {
+  text-align: center;
+  opacity: 0.7;
+  font-style: italic;
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 768px) {
+  .lista-produtos {
+    max-height: 40vh;
+    padding: 16px;
+  }
+
+  .produto-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .info {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

@@ -8,15 +8,49 @@ import "../styles/Dashboard.css";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 function Dashboard() {
-  const { transacoes, adicionarTransacao, setMensagens } = useFinanceData();
+  const { transacoes, setTransacoes, setMensagens } = useFinanceData();
   const [tipo, setTipo] = useState("ganho");
   const [valor, setValor] = useState("");
   const [descricao, setDescricao] = useState("");
   const navigate = useNavigate();
 
+  // === Adicionar transação ===
+  const adicionarTransacao = (tipo, valor, descricao) => {
+    const dataAtual = new Date().toLocaleDateString("pt-PT", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
+    const nova = {
+      id: Date.now(),
+      tipo,
+      valor,
+      descricao,
+      data: dataAtual,
+    };
+
+    setTransacoes((prev) => [nova, ...prev]);
+  };
+
+  // === Remover transação ===
+  const removerTransacao = (id) => {
+    const atualizado = transacoes.filter((t) => t.id !== id);
+    setTransacoes(atualizado);
+    setMensagens((prev) => [
+      ...prev,
+      {
+        from: "bot",
+        text: `<i class="fi fi-sr-trash"></i> Uma transação foi removida.`,
+      },
+    ]);
+  };
+
+  // === Totais ===
   const totalGanhos = transacoes
     .filter((t) => t.tipo === "ganho")
     .reduce((acc, t) => acc + t.valor, 0);
+
   const totalGastos = transacoes
     .filter((t) => t.tipo === "gasto")
     .reduce((acc, t) => acc + t.valor, 0);
@@ -29,9 +63,16 @@ function Dashboard() {
     ? ((totalGastos / totalGeral) * 100).toFixed(1)
     : 0;
 
+  // === Agrupar por data ===
+  const transacoesPorData = transacoes.reduce((acc, t) => {
+    if (!acc[t.data]) acc[t.data] = [];
+    acc[t.data].push(t);
+    return acc;
+  }, {});
+
+  // === Adicionar nova transação ===
   const handleAdd = () => {
     if (!valor) return alert("Digite um valor");
-    // usar o adicionarTransacao do hook (mantendo lógica centralizada)
     adicionarTransacao(tipo, Number(valor), descricao || "Sem descrição");
     setMensagens((prev) => [
       ...prev,
@@ -44,6 +85,7 @@ function Dashboard() {
     setDescricao("");
   };
 
+  // === Gráfico ===
   const data = {
     labels: ["Ganhos", "Gastos"],
     datasets: [
@@ -69,75 +111,95 @@ function Dashboard() {
 
   return (
     <div className="dashboard">
-      <div className="resumo">
-        <p>
-          <i className="fi fi-sr-sack-dollar"></i> Ganhos:{" "}
-          <strong>{totalGanhos} kz</strong>
-        </p>
-        <p>
-          <i className="fi fi-sr-trending-down"></i> Gastos:{" "}
-          <strong>{totalGastos} kz</strong>
-        </p>
-        <p>
-          <i className="fi fi-sr-wallet"></i> Saldo:{" "}
-          <strong>{totalGanhos - totalGastos} kz</strong>
-        </p>
-      </div>
+      <div className="view">
+        {/* === RESUMO === */}
+        <div className="resumo">
+          <p>
+            <i className="fi fi-sr-sack-dollar"></i> Ganhos:{" "}
+            <strong>{totalGanhos} kz</strong>
+          </p>
+          <p>
+            <i className="fi fi-sr-trending-down"></i> Gastos:{" "}
+            <strong>{totalGastos} kz</strong>
+          </p>
+          <p>
+            <i className="fi fi-sr-wallet"></i> Saldo:{" "}
+            <strong>{totalGanhos - totalGastos} kz</strong>
+          </p>
+        </div>
+        {/* === FORMULÁRIO === */}
+        <div className="form-add">
+          <select value={tipo} onChange={(e) => setTipo(e.target.value)}>
+            <option value="ganho">Ganho</option>
+            <option value="gasto">Gasto</option>
+          </select>
+          <input
+            type="number"
+            placeholder="Valor"
+            value={valor}
+            onChange={(e) => setValor(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Descrição"
+            value={descricao}
+            onChange={(e) => setDescricao(e.target.value)}
+          />
+          <button onClick={handleAdd}>
+            <i className="fi fi-sr-plus-small"></i> Adicionar
+          </button>
+        </div>
 
-      <div className="form-add">
-        <select value={tipo} onChange={(e) => setTipo(e.target.value)}>
-          <option value="ganho">Ganho</option>
-          <option value="gasto">Gasto</option>
-        </select>
-        <input
-          type="number"
-          placeholder="Valor"
-          value={valor}
-          onChange={(e) => setValor(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Descrição"
-          value={descricao}
-          onChange={(e) => setDescricao(e.target.value)}
-        />
-        <button onClick={handleAdd}>
-          <i className="fi fi-sr-plus-small"></i> Adicionar
+        {/* === LISTA === */}
+        <div className="lista">
+          {Object.keys(transacoesPorData).length > 0 ? (
+            Object.entries(transacoesPorData).map(([data, lista]) => (
+              <div key={data} className="grupo-data">
+                <h4>📅 {data}</h4>
+                {lista.map((t) => (
+                  <div key={t.id} className={`item ${t.tipo}`}>
+                    <span>
+                      {t.tipo === "ganho" ? (
+                        <i className="fi fi-sr-arrow-trend-up"></i>
+                      ) : (
+                        <i className="fi fi-sr-arrow-trend-down"></i>
+                      )}{" "}
+                      {t.descricao}
+                    </span>
+                    <div className="acoes">
+                      <span>{t.valor} kz</span>
+                      <button
+                        className="btn-remover"
+                        onClick={() => removerTransacao(t.id)}
+                      >
+                        ✖
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))
+          ) : (
+            <p style={{ textAlign: "center", color: "rgba(255,255,255,0.7)" }}>
+              Nenhuma transação ainda.
+            </p>
+          )}
+        </div>
+
+        {/* === GRÁFICO === */}
+        <div className="grafico">
+          <h3>Distribuição Financeira</h3>
+          <Pie data={data} options={options} />
+          <p>
+            <span style={{ color: "#00c46a" }}>Ganhos:</span> {percentGanhos}% |{" "}
+            <span style={{ color: "#ff4d4d" }}>Gastos:</span> {percentGastos}%
+          </p>
+        </div>
+
+        <button className="btn-back" onClick={() => navigate("/")}>
+          <i className="fi fi-sr-arrow-left"></i> Voltar
         </button>
       </div>
-
-      <div className="lista">
-        {transacoes && transacoes.length ? (
-          transacoes.map((t) => (
-            <div key={t.id} className={`item ${t.tipo}`}>
-              <span>
-                {t.tipo === "ganho" ? (
-                  <i className="fi fi-sr-arrow-trend-up"></i>
-                ) : (
-                  <i className="fi fi-sr-arrow-trend-down"></i>
-                )}{" "}
-                {t.descricao}
-              </span>
-              <span>{t.valor} kz</span>
-              <small>{t.data}</small>
-            </div>
-          ))
-        ) : (
-          <p style={{ textAlign: "center", color: "rgba(255,255,255,0.7)" }}>
-            Nenhuma transação ainda.
-          </p>
-        )}
-      </div>
-      {/* === GRÁFICO DE PIZZA === */}
-      <div className="grafico">
-        <h3>Distribuição Financeira</h3>
-        <Pie data={data} options={options} />
-        <p>
-          <span style={{ color: "#00c46a" }}>Ganhos:</span> {percentGanhos}% |{" "}
-          <span style={{ color: "#ff4d4d" }}>Gastos:</span> {percentGastos}%
-        </p>
-      </div>
-      <button className="btn-back" onClick={() => {navigate('/')}}> <i className="fi fi-sr-arrow-left"></i> Voltar</button>
     </div>
   );
 }

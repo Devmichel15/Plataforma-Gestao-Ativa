@@ -1,4 +1,4 @@
-/* ========== BASE E RESET ========== */
+/* ========== RESET E BASE ========== */
 * {
   margin: 0;
   padding: 0;
@@ -9,51 +9,60 @@
 body {
   background: linear-gradient(135deg, #0a0a0d 0%, #151015 100%);
   color: #fff;
-  line-height: 1.5;
-  display: flex;
-  flex-direction: column;
+  min-height: 100vh;
+  overflow-y: auto;
 }
-.btn-back {
+
+button {
+  background: linear-gradient(90deg, #b55cff, #ff6b00);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
   padding: 10px 16px;
   font-weight: 500;
-  width: 100px;
+  width: fit-content;
+  transition: 0.3s;
+  text-decoration: none;
 }
-
 /* ========== CONTAINER PRINCIPAL ========== */
 .dashboard {
-  max-width: 950px;
-  margin: 120px auto 60px; /* espaço pro header fixo */
-  padding: 40px;
-  background: rgba(20, 20, 25, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 18px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(12px);
   display: flex;
   flex-direction: column;
-  gap: 40px;
+  height: 100%;
+  justify-content: flex-start;
 }
 
-/* ========== RESUMO ========== */
+.view {
+  gap: 30px;
+  max-width: 950px;
+  margin: 120px auto 80px;
+  padding: 20px;
+  background: #1a1a1f;
+  border-radius: 16px;
+  box-shadow: 0 0 25px rgba(0, 0, 0, 0.45);
+  margin-top: 200px;
+  margin-top: 200px;
+}
+
+/* ========== RESUMO (dentro do dashboard) ========== */
 .resumo {
   display: flex;
   justify-content: space-around;
   flex-wrap: wrap;
   gap: 20px;
-  background: rgba(255, 255, 255, 0.02);
-  padding: 25px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  margin-top: 300px;
+  background: #141414;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .resumo p {
-  font-size: 1rem;
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.03);
-  padding: 12px 20px;
+  font-size: 1rem;
+  background: #000;
+  padding: 12px 18px;
   border-radius: 10px;
 }
 
@@ -61,185 +70,192 @@ body {
   color: #ff6b00;
 }
 
-/* ========== FORMULÁRIO DE ADIÇÃO ========== */
+/* ========== FORMULÁRIO ========== */
 .form-add {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
-  background: rgba(255, 255, 255, 0.02);
-  padding: 24px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  align-items: center;
+  gap: 12px;
   justify-content: center;
-  width: 100%;
+  background: #202024;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .form-add select,
 .form-add input {
-  padding: 12px 14px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.04);
+  background: #151518;
   color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px 14px;
   font-size: 0.95rem;
-  width: 200px;
-  transition: 0.3s;
+  width: 180px;
 }
 
-.form-add select:focus,
-.form-add input:focus {
-  border-color: #b55cff;
-  box-shadow: 0 0 8px rgba(181, 92, 255, 0.4);
-  outline: none;
+.form-add input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
 }
 
-/* ===== SELECT MELHORADO ===== */
-.form-add select {
-  appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg width='12' height='8' viewBox='0 0 12 8' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ffffff' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  background-size: 14px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.form-add select:hover {
-  background-color: rgba(255, 255, 255, 0.06);
-  border-color: #ff6b00;
-}
-
-.form-add option {
-  background-color: #1c1c24;
-  color: #fff;
-}
-
-/* ===== BOTÃO ===== */
 .form-add button {
-  background: linear-gradient(90deg, #b55cff, #ff6b00);
-  border: none;
-  border-radius: 10px;
+  background: #7a5af8;
   color: #fff;
-  padding: 12px 20px;
-  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  font-weight: 600;
   transition: 0.3s;
 }
 
 .form-add button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 12px rgba(255, 107, 0, 0.5);
+  background: #ff8533;
 }
-
 /* ========== LISTA DE TRANSAÇÕES ========== */
 .lista {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  background: rgba(255, 255, 255, 0.02);
-  padding: 24px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  overflow-y: auto;
-  max-height: 400px;
+  gap: 20px;
+  background: #1e1e22;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  /* ===== NOVO ===== */
+  max-height: 50vh; /* altura máxima proporcional à tela */
+  overflow-y: auto; /* ativa o scroll vertical */
+  flex-grow: 1; /* ocupa espaço restante */
 }
 
+/* Scroll visual */
+.lista::-webkit-scrollbar {
+  width: 6px;
+}
+
+.lista::-webkit-scrollbar-thumb {
+  background: #7a5af8; /* roxo para combinar com a paleta */
+  border-radius: 6px;
+}
+
+/* Ajuste de grupo de data */
+.grupo-data {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.grupo-data h4 {
+  margin-bottom: 10px;
+  color: #ff6b00; /* mantém laranja */
+  font-weight: 500;
+}
+
+/* ====== ITEM DE TRANSAÇÃO ====== */
 .item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 18px;
-  border-radius: 12px;
-  transition: 0.3s ease;
-  font-size: 0.95rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: #2a2a2f;
+  padding: 10px 14px;
+  border-radius: 8px;
+  transition: background 0.3s, border-left 0.3s;
 }
 
 .item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  transform: scale(1.01);
+  background: #323238;
+}
+
+/* Ganho = verde na borda lateral */
+.item.ganho {
+  border-left: 4px solid #00c46a;
+}
+
+/* Gasto = vermelho na borda lateral */
+.item.gasto {
+  border-left: 4px solid #ff4d4d;
 }
 
 .item span {
+  color: #fff;
+}
+
+.item .acoes {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
-.item.ganho {
-  border-left: 4px solid #6a1b9a;
+.item .btn-remover {
+  background: transparent;
+  border: none;
+  color: #ff4d4d;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: transform 0.2s;
 }
 
-.item.gasto {
-  border-left: 4px solid #ff6b00;
-}
-
-/* ========== SCROLLBAR ========== */
-.lista::-webkit-scrollbar {
-  width: 6px;
-}
-.lista::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #b55cff, #ff6b00);
-  border-radius: 10px;
+.item .btn-remover:hover {
+  transform: scale(1.2);
 }
 
 /* ========== GRÁFICO ========== */
 .grafico {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 20px;
   text-align: center;
-  margin: 20px 0;
+  background: #1f1f23;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .grafico h3 {
-  margin-bottom: 10px;
-  font-weight: 600;
-  color: #fff;
+  margin-bottom: 25px;
+  font-size: 1.3rem;
+  color: #7a5af8;
 }
 
 .grafico canvas {
-  max-width: 300px;
+  max-width: 280px;
   margin: 0 auto;
+}
+
+.grafico p {
+  margin-top: 20px;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ========== BOTÃO VOLTAR ========== */
+
+
+.btn-back:hover {
+  background: #ff8533;
+  transform: translateY(-2px);
 }
 
 /* ========== RESPONSIVIDADE ========== */
 @media (max-width: 768px) {
-  header {
-    padding: 16px 20px;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  header h2 {
-    font-size: 1.3rem;
-  }
-
   .dashboard {
-    margin: 110px 16px 60px;
-    padding: 12px;
-    gap: 24px;
+    padding: 25px;
+    margin: 100px auto 60px;
+    margin-top: 550px;
   }
 
   .resumo {
     flex-direction: column;
-    align-items: flex-start;
-    margin-top: 500px;
-    width: 100%;
+    align-items: center;
+  }
+
+  .form-add {
+    flex-direction: column;
   }
 
   .form-add select,
-  .form-add input {
+  .form-add input,
+  .form-add button {
     width: 100%;
   }
 
-  .item {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
+  .grafico canvas {
+    max-width: 220px;
   }
 }
