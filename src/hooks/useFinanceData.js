@@ -46,9 +46,6 @@ async function clearStore(store) {
 // 🔹 HOOK PRINCIPAL
 // ======================
 export function useFinanceData() {
-  // ======================
-  // 🔹 ESTADO INICIAL DO LOCALSTORAGE
-  // ======================
   const savedData = JSON.parse(localStorage.getItem("gestaoActivaData")) || {
     transacoes: [],
     produtos: [],
@@ -60,10 +57,6 @@ export function useFinanceData() {
   const [produtos, setProdutos] = useState(savedData.produtos || []);
   const [mensagens, setMensagens] = useState(savedData.mensagens || []);
   const [dadosCliente, setDadosCliente] = useState(savedData.dadosCliente);
-
-  // ======================
-  // 🔹 LOADING FLAG (fallback visual imediato)
-  // ======================
   const [loadingCliente, setLoadingCliente] = useState(true);
 
   // ======================
@@ -85,13 +78,11 @@ export function useFinanceData() {
         if (dbMensagens?.length) setMensagens(dbMensagens.reverse());
         if (dbDadosCliente?.length) {
           setDadosCliente(dbDadosCliente[0]);
-        } else {
-          // fallback para localStorage se IndexedDB ainda estiver vazio
-          if (savedData.dadosCliente) setDadosCliente(savedData.dadosCliente);
+        } else if (savedData.dadosCliente) {
+          setDadosCliente(savedData.dadosCliente);
         }
       } catch (err) {
         console.error("Erro ao carregar dados do IndexedDB:", err);
-        // fallback localStorage
         if (savedData.dadosCliente) setDadosCliente(savedData.dadosCliente);
       } finally {
         setLoadingCliente(false);
@@ -130,15 +121,17 @@ export function useFinanceData() {
   }
 
   // ======================
-  // 🔹 FUNÇÕES DE PRODUTOS
+  // 🔹 FUNÇÕES DE PRODUTOS (ATUALIZADAS COM LUCRO)
   // ======================
-  async function adicionarProduto(nome, categoria, quantidade, preco) {
+  async function adicionarProduto(nome, categoria, quantidade, precoVenda, precoCusto, lucro) {
     const novoProduto = {
       id: Date.now(),
       nome,
       categoria,
       quantidade: parseInt(quantidade) || 0,
-      preco: parseFloat(preco) || 0,
+      precoCusto: parseFloat(precoCusto) || 0,
+      precoVenda: parseFloat(precoVenda) || 0,
+      lucro: parseFloat(lucro) || 0,
       data: new Date().toLocaleDateString("pt-PT"),
     };
     await addItem("produtos", novoProduto);
@@ -201,7 +194,7 @@ export function useFinanceData() {
   // 🔹 RETORNO
   // ======================
   return {
-    loadingCliente,      // útil para LandingPage saber se ainda está carregando
+    loadingCliente,
     transacoes,
     produtos,
     mensagens,

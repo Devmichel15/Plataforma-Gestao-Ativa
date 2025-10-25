@@ -15,14 +15,15 @@ export default function Produtos() {
   const [nome, setNome] = useState("");
   const [categoria, setCategoria] = useState("");
   const [quantidade, setQuantidade] = useState("");
-  const [preco, setPreco] = useState("");
+  const [precoCusto, setPrecoCusto] = useState("");
+  const [precoVenda, setPrecoVenda] = useState("");
   const [busca, setBusca] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Totais
   const totalProdutos = produtos?.length || 0;
   const valorTotal = produtos?.reduce(
-    (acc, p) => acc + (p.quantidade * p.preco || 0),
+    (acc, p) => acc + (p.quantidade * p.precoVenda || 0),
     0
   );
 
@@ -30,26 +31,35 @@ export default function Produtos() {
   const produtosFiltrados = Object.entries(produtosPorData || {})
     .map(([data, lista]) => [
       data,
-      lista.filter((p) =>
-        p.nome?.toLowerCase().includes(busca.toLowerCase())
-      ),
+      lista.filter((p) => p.nome?.toLowerCase().includes(busca.toLowerCase())),
     ])
     .filter(([_, lista]) => lista.length > 0)
     .sort(([a], [b]) => new Date(b) - new Date(a));
 
   async function handleAdicionar() {
-    if (!nome || !categoria || !quantidade || !preco) {
+    if (!nome || !categoria || !quantidade || !precoCusto || !precoVenda) {
       alert("Preencha todos os campos antes de adicionar!");
       return;
     }
 
+    const lucro =
+      (parseFloat(precoVenda) - parseFloat(precoCusto)) * parseInt(quantidade);
+
     setLoading(true);
     try {
-      await adicionarProduto(nome, categoria, quantidade, preco);
+      await adicionarProduto(
+        nome,
+        categoria,
+        quantidade,
+        precoVenda,
+        precoCusto,
+        lucro
+      );
       setNome("");
       setCategoria("");
       setQuantidade("");
-      setPreco("");
+      setPrecoCusto("");
+      setPrecoVenda("");
     } catch (err) {
       console.error("Erro ao adicionar produto:", err);
       alert("Erro ao adicionar produto. Tente novamente.");
@@ -74,7 +84,8 @@ export default function Produtos() {
         <h2>📦 Gestão de Produtos</h2>
         {dadosCliente && (
           <p className="descricao">
-            Olá, <strong>{dadosCliente.name}</strong>! Acompanhe seus produtos em estoque.
+            Olá, <strong>{dadosCliente.nome}</strong>! Acompanhe seus produtos
+            em estoque.
           </p>
         )}
 
@@ -104,15 +115,21 @@ export default function Produtos() {
           />
           <input
             type="number"
-            placeholder="Qtd"
+            placeholder="Quantidade"
             value={quantidade}
             onChange={(e) => setQuantidade(e.target.value)}
           />
           <input
             type="number"
-            placeholder="Preço (Kz)"
-            value={preco}
-            onChange={(e) => setPreco(e.target.value)}
+            placeholder="Preço de Custo (Kz)"
+            value={precoCusto}
+            onChange={(e) => setPrecoCusto(e.target.value)}
+          />
+          <input
+            type="number"
+            placeholder="Preço de Venda (Kz)"
+            value={precoVenda}
+            onChange={(e) => setPrecoVenda(e.target.value)}
           />
           <button
             className="btn-add"
@@ -142,7 +159,13 @@ export default function Produtos() {
                       <strong>{p.nome}</strong>
                       <span>{p.categoria}</span>
                       <span>{p.quantidade} un.</span>
-                      <span className="preco">Kz {p.preco.toLocaleString()}</span>
+                      <span>
+                        Custo: Kz {(p.precoCusto || 0).toLocaleString()}
+                      </span>
+                      <span>
+                        Venda: Kz {(p.precoVenda || 0).toLocaleString()}
+                      </span>
+                      <span>Lucro: Kz {(p.lucro || 0).toLocaleString()}</span>
                     </div>
                     <button
                       className="btn-remover"
@@ -159,7 +182,9 @@ export default function Produtos() {
           )}
         </div>
 
-        <Link to="/" className="btn-voltar">← Voltar</Link>
+        <Link to="/" className="btn-voltar">
+          ← Voltar
+        </Link>
       </div>
     </div>
   );

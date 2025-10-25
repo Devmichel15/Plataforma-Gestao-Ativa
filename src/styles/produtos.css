@@ -10,7 +10,7 @@
 
 .produtos-card {
   width: 90%;
-  max-width: 950px;
+  max-width: 1000px;
   background: rgba(20, 20, 25, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 18px;
@@ -188,9 +188,9 @@ input:focus {
   color: #fff;
 }
 
-.info span.preco {
-  color: #ff6b00; /* laranja para preço */
-  font-weight: 600;
+.info span {
+  border-right: 1px solid #ff6b00;
+  padding-right: 3px;
 }
 
 /* Botão remover */

@@ -11,12 +11,14 @@ function Chatbot() {
     dadosCliente,
     setDadosCliente,
     transacoes,
+    produtos,
   } = useFinanceData();
 
   const [inputValue, setInputValue] = useState("");
   const [indicePergunta, setIndicePergunta] = useState(0);
   const [modoOnboarding, setModoOnboarding] = useState(!dadosCliente?.nome);
   const [notificacao, setNotificacao] = useState(null);
+
   const messagesEndRef = useRef(null);
   const navigate = useNavigate();
 
@@ -25,30 +27,6 @@ function Chatbot() {
     "Em qual área você trabalha?",
     "Quais são os seus objetivos com o uso da Gestão Activa?",
   ];
-
-  /* === MENSAGENS INICIAIS === */
-  useEffect(() => {
-    if (!mensagens.length) {
-      if (dadosCliente?.nome) {
-        setMensagens([
-          { from: "bot", text: `👋 Olá, ${dadosCliente.nome}!` },
-          {
-            from: "bot",
-            text: "Sou o Gestor Ativo — teu consultor virtual. Vamos aumentar os teus lucros hoje?",
-          },
-        ]);
-      } else {
-        setMensagens([
-          {
-            from: "bot",
-            text: `👋 Olá! Sou o <b>Gestor Ativo</b>, teu assistente virtual da Gestão Activa.`,
-          },
-          { from: "bot", text: perguntasInicio[0] },
-        ]);
-        setModoOnboarding(true);
-      }
-    }
-  }, []);
 
   /* === SCROLL AUTOMÁTICO === */
   useEffect(() => {
@@ -65,7 +43,7 @@ function Chatbot() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  /* === SOM SEM ARQUIVO (Web Audio API) === */
+  /* === SOM DE NOTIFICAÇÃO === */
   const tocarSom = () => {
     try {
       const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -73,7 +51,7 @@ function Chatbot() {
       const gain = ctx.createGain();
       osc.type = "sine";
       osc.frequency.setValueAtTime(880, ctx.currentTime);
-      gain.gain.setValueAtTime(0.05, ctx.currentTime); // volume suave
+      gain.gain.setValueAtTime(0.05, ctx.currentTime);
       osc.connect(gain);
       gain.connect(ctx.destination);
       osc.start();
@@ -81,17 +59,63 @@ function Chatbot() {
     } catch {}
   };
 
-  /* === MOSTRAR NOTIFICAÇÃO === */
   const mostrarNotificacao = (msg) => {
     setNotificacao(msg);
     tocarSom();
     setTimeout(() => setNotificacao(null), 4000);
   };
 
+  /* === RESPOSTAS INTERNAS PARA PERGUNTAS COMUNS === */
+  const responderInterno = (pergunta) => {
+    const lower = pergunta.toLowerCase();
+
+    // Saudações
+    if (["olá", "oi", "ola", "bom dia", "boa tarde", "boa noite"].includes(lower)) {
+      return `👋 Olá, ${dadosCliente.nome || "tudo bem?"}!`;
+    }
+
+    // Nome do usuário
+    if (lower.includes("meu nome") || lower.includes("qual é meu nome")) {
+      return dadosCliente.nome ? `Seu nome é ${dadosCliente.nome}.` : "Ainda não sei seu nome!";
+    }
+
+    // Área do usuário
+    if (lower.includes("minha área") || lower.includes("qual é minha área")) {
+      return dadosCliente.area ? `Sua área é ${dadosCliente.area}.` : "Ainda não sei sua área!";
+    }
+
+    // Objetivos
+    if (lower.includes("meus objetivos") || lower.includes("quais são meus objetivos")) {
+      return dadosCliente.objetivos
+        ? `Seus objetivos são: ${dadosCliente.objetivos}`
+        : "Ainda não sei seus objetivos!";
+    }
+
+    // Dicas financeiras básicas
+    if (lower.includes("como aumentar meus lucros") || lower.includes("aumentar lucro")) {
+      return "💡 Dica: registre todos os ganhos e gastos, analise o saldo mensal e reinvista parte dos lucros!";
+    }
+
+    // Perguntas genéricas sobre produtos
+    if (lower.includes("produtos") || lower.includes("inventário") || lower.includes("meus produtos")) {
+      setTimeout(() => navigate("/produtos"), 500);
+      return "🔗 Abrindo a tela de produtos...";
+    }
+
+    // Perguntas genéricas sobre dashboard
+    if (lower.includes("dashboard") || lower.includes("painel")) {
+      setTimeout(() => navigate("/dashboard"), 500);
+      return "🔗 Abrindo o dashboard...";
+    }
+
+    return null; // Não encontrou resposta interna
+  };
+
   /* === ENVIAR MENSAGEM === */
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     const trimmed = inputValue.trim();
     if (!trimmed) return;
+
     setMensagens((prev) => [...prev, { from: "user", text: trimmed }]);
     setInputValue("");
 
@@ -132,7 +156,7 @@ function Chatbot() {
 
     const lower = trimmed.toLowerCase();
 
-    // === GASTO ===
+    // === COMANDOS INTERNOS ===
     if (lower.includes("gastei") || lower.includes("gasto")) {
       const valor = trimmed.match(/\d+/);
       if (valor) {
@@ -143,15 +167,11 @@ function Chatbot() {
         ]);
         mostrarNotificacao(`💸 Gasto de <b>${valor[0]} kz</b> adicionado.`);
       } else {
-        setMensagens((p) => [
-          ...p,
-          { from: "bot", text: `💬 Qual o valor do gasto?` },
-        ]);
+        setMensagens((p) => [...p, { from: "bot", text: `💬 Qual o valor do gasto?` }]);
       }
       return;
     }
 
-    // === GANHO ===
     if (lower.includes("ganhei") || lower.includes("recebi")) {
       const valor = trimmed.match(/\d+/);
       if (valor) {
@@ -162,52 +182,43 @@ function Chatbot() {
         ]);
         mostrarNotificacao(`📈 Ganho de <b>${valor[0]} kz</b> adicionado.`);
       } else {
-        setMensagens((p) => [
-          ...p,
-          { from: "bot", text: `💬 Qual foi o valor do ganho?` },
-        ]);
+        setMensagens((p) => [...p, { from: "bot", text: `💬 Qual foi o valor do ganho?` }]);
       }
       return;
     }
 
-    // === ANÁLISE ===
     if (lower.includes("análise") || lower.includes("resumo")) {
       gerarAnaliseInteligente();
       return;
     }
 
-    // === DASHBOARD ===
-    if (lower.includes("dashboard") || lower.includes("painel")) {
-      setMensagens((prev) => [
-        ...prev,
-        { from: "bot", text: `🔗 A abrir o teu dashboard...` },
-      ]);
-      setTimeout(() => navigate("/dashboard"), 1000);
+    // === RESPOSTAS INTERNAS ===
+    const respostaInterna = responderInterno(trimmed);
+    if (respostaInterna) {
+      setMensagens((prev) => [...prev, { from: "bot", text: respostaInterna }]);
       return;
     }
 
-    // === PADRÃO ===
+    // === PADRÃO (quando não reconhece) ===
     setMensagens((prev) => [
       ...prev,
       {
         from: "bot",
         text:
-          `ℹ️ Posso registrar ganhos e gastos, mostrar teu dashboard ou fazer uma <b>análise</b>.<br>` +
+          `ℹ️ Não entendi exatamente. Posso registrar ganhos e gastos, mostrar seu dashboard ou análise do mês.<br>` +
           `Ex: <em>“Ganhei 15000”</em> ou <em>“Faz uma análise do mês”</em>.`,
       },
     ]);
   };
 
-  /* === ANÁLISE === */
+  /* === ANÁLISE FINANCEIRA === */
   const gerarAnaliseInteligente = () => {
     if (!transacoes.length) {
       setMensagens((prev) => [
         ...prev,
         {
           from: "bot",
-          text:
-            `📊 Ainda não tens dados suficientes para análise.<br>` +
-            `Registra alguns ganhos e gastos primeiro.`,
+          text: `📊 Ainda não tens dados suficientes para análise.<br>Registra alguns ganhos e gastos primeiro.`,
         },
       ]);
       return;
@@ -220,8 +231,7 @@ function Chatbot() {
       .filter((t) => t.tipo === "gasto")
       .reduce((acc, cur) => acc + cur.valor, 0);
     const saldo = ganhos - gastos;
-    const tendencia =
-      saldo > 0 ? "🟢 Lucro" : saldo < 0 ? "🔴 Prejuízo" : "🟡 Equilíbrio";
+    const tendencia = saldo > 0 ? "🟢 Lucro" : saldo < 0 ? "🔴 Prejuízo" : "🟡 Equilíbrio";
 
     const analise = `
       <div class="analise-card">
