@@ -5,21 +5,21 @@ import { useFinanceData } from "../hooks/useFinanceData";
 
 function Sign() {
   const navigate = useNavigate();
-  const { setDadosCliente } = useFinanceData();
+  const { dadosCliente, atualizarDadosCliente, setDadosCliente } =
+    useFinanceData();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [users, setUsers] = useState([]);
 
-  // 🔹 Carregar usuários do localStorage ao iniciar
+  // 🔹 Preenche automaticamente caso já tenha cliente salvo
   useEffect(() => {
-    const usersData = localStorage.getItem("users");
-    if (usersData) {
-      setUsers(JSON.parse(usersData));
+    if (dadosCliente) {
+      setName(dadosCliente.name || "");
+      setEmail(dadosCliente.email || "");
     }
-  }, []);
+  }, [dadosCliente]);
 
-  function RegisterUser(e) {
+  async function RegisterUser(e) {
     e.preventDefault();
 
     if (name.trim() === "" || email.trim() === "") {
@@ -27,48 +27,48 @@ function Sign() {
       return;
     }
 
-    const newUser = { name, email };
-    const updatedUsers = [...users, newUser];
+    const novoCliente = { nome: name, email };
 
-    // 🔸 Salvar na lista geral de usuários
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
-    setUsers(updatedUsers);
-
-    // 🔸 Atualizar dados do cliente atual (gestaoActivaData)
-    setDadosCliente(newUser);
-
-    // 🔸 Mensagem de confirmação
-    setTimeout(() => {
-      setName("");
-      setEmail("");
+    try {
+      await atualizarDadosCliente(novoCliente);
+      setDadosCliente(novoCliente);
       alert("Registo bem-sucedido!");
-      navigate("/"); // voltar para a página principal
-    }, 600);
+      navigate("/"); // volta para landing page
+    } catch (err) {
+      console.error("Erro ao registrar:", err);
+      alert("Ocorreu um erro ao registrar. Tente novamente.");
+    }
   }
 
   function handleLogout() {
     localStorage.removeItem("gestaoActivaData");
-    localStorage.removeItem("users");
-    setUsers([]);
     setDadosCliente(null);
     alert("Sessão encerrada.");
+    navigate("/sign");
   }
 
   return (
     <div className="login">
       <form className="container" onSubmit={RegisterUser}>
-        {users.length > 0 ? (
+        {dadosCliente ? (
           <div className="infosUser">
             <h2>Usuário Registado</h2>
-            {users.map((user, index) => (
-              <div key={index}>
-                <p><b>Nome:</b> {user.name}</p>
-                <p><b>Email:</b> {user.email}</p>
-              </div>
-            ))}
-            <button type="button" className="btn-secondary" onClick={handleLogout}>
-              Terminar Sessão
-            </button>
+            <p>
+              <b>Nome:</b> {dadosCliente.name}
+            </p>
+            <p>
+              <b>Email:</b> {dadosCliente.email}
+            </p>
+
+            <div className="btns">
+              <button
+                type="button"
+                className="btn-secondary"
+                onClick={handleLogout}
+              >
+                Terminar Sessão
+              </button>
+            </div>
           </div>
         ) : (
           <>

@@ -9,6 +9,7 @@ export default function Produtos() {
     adicionarProduto,
     removerProduto,
     produtosPorData,
+    dadosCliente,
   } = useFinanceData();
 
   const [nome, setNome] = useState("");
@@ -16,30 +17,66 @@ export default function Produtos() {
   const [quantidade, setQuantidade] = useState("");
   const [preco, setPreco] = useState("");
   const [busca, setBusca] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Totais
-  const totalProdutos = produtos.length;
-  const valorTotal = produtos.reduce(
-    (acc, p) => acc + p.quantidade * p.preco,
+  const totalProdutos = produtos?.length || 0;
+  const valorTotal = produtos?.reduce(
+    (acc, p) => acc + (p.quantidade * p.preco || 0),
     0
   );
 
   // Produtos filtrados
-  const produtosFiltrados = Object.entries(produtosPorData)
+  const produtosFiltrados = Object.entries(produtosPorData || {})
     .map(([data, lista]) => [
       data,
       lista.filter((p) =>
-        p.nome.toLowerCase().includes(busca.toLowerCase())
+        p.nome?.toLowerCase().includes(busca.toLowerCase())
       ),
     ])
     .filter(([_, lista]) => lista.length > 0)
     .sort(([a], [b]) => new Date(b) - new Date(a));
 
+  async function handleAdicionar() {
+    if (!nome || !categoria || !quantidade || !preco) {
+      alert("Preencha todos os campos antes de adicionar!");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await adicionarProduto(nome, categoria, quantidade, preco);
+      setNome("");
+      setCategoria("");
+      setQuantidade("");
+      setPreco("");
+    } catch (err) {
+      console.error("Erro ao adicionar produto:", err);
+      alert("Erro ao adicionar produto. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleRemover(id) {
+    if (window.confirm("Deseja realmente remover este produto?")) {
+      try {
+        await removerProduto(id);
+      } catch (err) {
+        console.error("Erro ao remover produto:", err);
+      }
+    }
+  }
+
   return (
     <div className="produtos-container">
       <div className="produtos-card">
         <h2>📦 Gestão de Produtos</h2>
-        <p className="descricao">Cadastre, visualize e acompanhe seus produtos em estoque.</p>
+        {dadosCliente && (
+          <p className="descricao">
+            Olá, <strong>{dadosCliente.name}</strong>! Acompanhe seus produtos em estoque.
+          </p>
+        )}
 
         <div className="resumo-produtos">
           <div className="resumo-item">
@@ -53,18 +90,46 @@ export default function Produtos() {
         </div>
 
         <div className="form-produtos">
-          <input type="text" placeholder="Nome do produto" value={nome} onChange={(e) => setNome(e.target.value)} />
-          <input type="text" placeholder="Categoria" value={categoria} onChange={(e) => setCategoria(e.target.value)} />
-          <input type="number" placeholder="Qtd" value={quantidade} onChange={(e) => setQuantidade(e.target.value)} />
-          <input type="number" placeholder="Preço (Kz)" value={preco} onChange={(e) => setPreco(e.target.value)} />
-          <button onClick={() => {
-            if (!nome || !categoria || !quantidade || !preco) return;
-            adicionarProduto(nome, categoria, quantidade, preco);
-            setNome(""); setCategoria(""); setQuantidade(""); setPreco("");
-          }}>+ Adicionar</button>
+          <input
+            type="text"
+            placeholder="Nome do produto"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Categoria"
+            value={categoria}
+            onChange={(e) => setCategoria(e.target.value)}
+          />
+          <input
+            type="number"
+            placeholder="Qtd"
+            value={quantidade}
+            onChange={(e) => setQuantidade(e.target.value)}
+          />
+          <input
+            type="number"
+            placeholder="Preço (Kz)"
+            value={preco}
+            onChange={(e) => setPreco(e.target.value)}
+          />
+          <button
+            className="btn-add"
+            onClick={handleAdicionar}
+            disabled={loading}
+          >
+            {loading ? "Salvando..." : "+ Adicionar"}
+          </button>
         </div>
 
-        <input type="text" className="busca" placeholder="🔍 Buscar produto..." value={busca} onChange={(e) => setBusca(e.target.value)} />
+        <input
+          type="text"
+          className="busca"
+          placeholder="🔍 Buscar produto..."
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
+        />
 
         <div className="lista-produtos">
           {produtosFiltrados.length > 0 ? (
@@ -79,7 +144,12 @@ export default function Produtos() {
                       <span>{p.quantidade} un.</span>
                       <span className="preco">Kz {p.preco.toLocaleString()}</span>
                     </div>
-                    <button className="btn-remover" onClick={() => removerProduto(p.id)}>✖</button>
+                    <button
+                      className="btn-remover"
+                      onClick={() => handleRemover(p.id)}
+                    >
+                      ✖
+                    </button>
                   </div>
                 ))}
               </div>

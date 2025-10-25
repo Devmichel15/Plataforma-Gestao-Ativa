@@ -1,7 +1,54 @@
 import { useState, useEffect } from "react";
+import { openDB } from "idb";
 
+// ======================
+// 🔹 CONFIGURAÇÃO DO INDEXEDDB
+// ======================
+const DB_NAME = "GestaoActivaDB";
+const STORES = ["transacoes", "produtos", "mensagens", "dadosCliente"];
+
+async function initDB() {
+  return openDB(DB_NAME, 1, {
+    upgrade(db) {
+      STORES.forEach((store) => {
+        if (!db.objectStoreNames.contains(store)) {
+          db.createObjectStore(store, { keyPath: "id", autoIncrement: true });
+        }
+      });
+    },
+  });
+}
+
+// ======================
+// 🔹 FUNÇÕES GENÉRICAS DE BANCO
+// ======================
+async function addItem(store, item) {
+  const db = await initDB();
+  await db.add(store, item);
+}
+
+async function getAll(store) {
+  const db = await initDB();
+  return db.getAll(store);
+}
+
+async function deleteItem(store, id) {
+  const db = await initDB();
+  await db.delete(store, id);
+}
+
+async function clearStore(store) {
+  const db = await initDB();
+  await db.clear(store);
+}
+
+// ======================
+// 🔹 HOOK PRINCIPAL
+// ======================
 export function useFinanceData() {
-  // Carregar dados do localStorage
+  // ======================
+  // 🔹 ESTADO INICIAL DO LOCALSTORAGE
+  // ======================
   const savedData = JSON.parse(localStorage.getItem("gestaoActivaData")) || {
     transacoes: [],
     produtos: [],
@@ -9,12 +56,54 @@ export function useFinanceData() {
     dadosCliente: null,
   };
 
-  const [transacoes, setTransacoes] = useState(savedData.transacoes);
-  const [produtos, setProdutos] = useState(savedData.produtos);
-  const [mensagens, setMensagens] = useState(savedData.mensagens);
+  const [transacoes, setTransacoes] = useState(savedData.transacoes || []);
+  const [produtos, setProdutos] = useState(savedData.produtos || []);
+  const [mensagens, setMensagens] = useState(savedData.mensagens || []);
   const [dadosCliente, setDadosCliente] = useState(savedData.dadosCliente);
 
-  // Persistência automática
+  // ======================
+  // 🔹 LOADING FLAG (fallback visual imediato)
+  // ======================
+  const [loadingCliente, setLoadingCliente] = useState(true);
+
+  // ======================
+  // 🔹 CARREGAR DADOS DO INDEXEDDB
+  // ======================
+  useEffect(() => {
+    async function carregarDados() {
+      try {
+        const [dbTransacoes, dbProdutos, dbMensagens, dbDadosCliente] =
+          await Promise.all([
+            getAll("transacoes"),
+            getAll("produtos"),
+            getAll("mensagens"),
+            getAll("dadosCliente"),
+          ]);
+
+        if (dbTransacoes?.length) setTransacoes(dbTransacoes.reverse());
+        if (dbProdutos?.length) setProdutos(dbProdutos.reverse());
+        if (dbMensagens?.length) setMensagens(dbMensagens.reverse());
+        if (dbDadosCliente?.length) {
+          setDadosCliente(dbDadosCliente[0]);
+        } else {
+          // fallback para localStorage se IndexedDB ainda estiver vazio
+          if (savedData.dadosCliente) setDadosCliente(savedData.dadosCliente);
+        }
+      } catch (err) {
+        console.error("Erro ao carregar dados do IndexedDB:", err);
+        // fallback localStorage
+        if (savedData.dadosCliente) setDadosCliente(savedData.dadosCliente);
+      } finally {
+        setLoadingCliente(false);
+      }
+    }
+
+    carregarDados();
+  }, []);
+
+  // ======================
+  // 🔹 SINCRONIZAÇÃO COM LOCALSTORAGE
+  // ======================
   useEffect(() => {
     const data = { transacoes, produtos, mensagens, dadosCliente };
     localStorage.setItem("gestaoActivaData", JSON.stringify(data));
@@ -23,63 +112,111 @@ export function useFinanceData() {
   // ======================
   // 🔹 FUNÇÕES DE TRANSAÇÕES
   // ======================
-  function adicionarTransacao(tipo, valor, descricao) {
+  async function adicionarTransacao(tipo, valor, descricao) {
     const nova = {
       id: Date.now(),
       tipo,
-      valor,
+      valor: parseFloat(valor) || 0,
       descricao,
       data: new Date().toLocaleDateString("pt-PT"),
     };
+    await addItem("transacoes", nova);
     setTransacoes((prev) => [nova, ...prev]);
+  }
+
+  async function removerTransacao(id) {
+    await deleteItem("transacoes", id);
+    setTransacoes((prev) => prev.filter((t) => t.id !== id));
   }
 
   // ======================
   // 🔹 FUNÇÕES DE PRODUTOS
   // ======================
-  function adicionarProduto(nome, categoria, quantidade, preco) {
+  async function adicionarProduto(nome, categoria, quantidade, preco) {
     const novoProduto = {
       id: Date.now(),
       nome,
       categoria,
-      quantidade: parseInt(quantidade),
-      preco: parseFloat(preco),
+      quantidade: parseInt(quantidade) || 0,
+      preco: parseFloat(preco) || 0,
       data: new Date().toLocaleDateString("pt-PT"),
     };
+    await addItem("produtos", novoProduto);
     setProdutos((prev) => [novoProduto, ...prev]);
   }
 
-  function removerProduto(id) {
+  async function removerProduto(id) {
+    await deleteItem("produtos", id);
     setProdutos((prev) => prev.filter((p) => p.id !== id));
+  }
+
+  // ======================
+  // 🔹 FUNÇÕES DE MENSAGENS
+  // ======================
+  async function adicionarMensagem(autor, texto) {
+    const novaMensagem = {
+      id: Date.now(),
+      autor,
+      texto,
+      data: new Date().toLocaleString("pt-PT"),
+    };
+    await addItem("mensagens", novaMensagem);
+    setMensagens((prev) => [novaMensagem, ...prev]);
+  }
+
+  async function limparMensagens() {
+    await clearStore("mensagens");
+    setMensagens([]);
+  }
+
+  // ======================
+  // 🔹 DADOS DO CLIENTE
+  // ======================
+  async function atualizarDadosCliente(dados) {
+    await clearStore("dadosCliente");
+    await addItem("dadosCliente", dados);
+    setDadosCliente(dados);
   }
 
   // ======================
   // 🔹 AGRUPAMENTO POR DATA
   // ======================
-  const transacoesPorData = transacoes.reduce((acc, t) => {
-    if (!acc[t.data]) acc[t.data] = [];
-    acc[t.data].push(t);
-    return acc;
-  }, {});
+  const transacoesPorData = Array.isArray(transacoes)
+    ? transacoes.reduce((acc, t) => {
+        if (!acc[t.data]) acc[t.data] = [];
+        acc[t.data].push(t);
+        return acc;
+      }, {})
+    : {};
 
-  const produtosPorData = produtos.reduce((acc, p) => {
-    if (!acc[p.data]) acc[p.data] = [];
-    acc[p.data].push(p);
-    return acc;
-  }, {});
+  const produtosPorData = Array.isArray(produtos)
+    ? produtos.reduce((acc, p) => {
+        if (!acc[p.data]) acc[p.data] = [];
+        acc[p.data].push(p);
+        return acc;
+      }, {})
+    : {};
 
+  // ======================
+  // 🔹 RETORNO
+  // ======================
   return {
+    loadingCliente,      // útil para LandingPage saber se ainda está carregando
     transacoes,
     produtos,
     mensagens,
     dadosCliente,
-    setMensagens,
-    setDadosCliente,
     setTransacoes,
     setProdutos,
+    setMensagens,
+    setDadosCliente,
     adicionarTransacao,
+    removerTransacao,
     adicionarProduto,
     removerProduto,
+    adicionarMensagem,
+    limparMensagens,
+    atualizarDadosCliente,
     transacoesPorData,
     produtosPorData,
   };

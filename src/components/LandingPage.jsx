@@ -6,26 +6,45 @@ import { useFinanceData } from "../hooks/useFinanceData";
 function LandingPage() {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
-  const { dadosCliente } = useFinanceData();
+  const [userName, setUserName] = useState("");
+  const { dadosCliente, loadingCliente } = useFinanceData(); // ✅ use loadingCliente
 
-  // 🔹 Detecta se o usuário já está registado
+  // ✅ Atualiza o nome do usuário sempre que dadosCliente mudar ou houver localStorage
   useEffect(() => {
-    if (dadosCliente && dadosCliente.nome) {
-      console.log("Usuário ativo:", dadosCliente.nome);
-    }
+    const carregarNome = () => {
+      if (dadosCliente && dadosCliente.nome) {
+        setUserName(dadosCliente.nome);
+        console.log("✅ Usuário ativo (IndexedDB):", dadosCliente.nome);
+        return;
+      }
+
+      const savedData = JSON.parse(localStorage.getItem("gestaoActivaData"));
+      const nome = savedData?.dadosCliente?.nome;
+      if (nome) {
+        setUserName(nome);
+        console.log("✅ Usuário ativo (LocalStorage):", nome);
+      }
+    };
+
+    carregarNome();
   }, [dadosCliente]);
 
-  // 🔹 Detecta rolagem para aplicar efeito no header
+  // 🔹 Efeito de scroll
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // 🔹 Navegação
   const irParaChat = () => navigate("/chatbot");
   const irParaLogin = () => navigate("/sign");
   const irParaDashboard = () => navigate("/dashboard");
+  const irParaProdutos = () => navigate("/produtos");
 
+  // =======================
+  // 🔹 JSX
+  // =======================
   return (
     <div className="landing">
       <header className={`header ${scrolled ? "scrolled" : ""}`}>
@@ -36,10 +55,15 @@ function LandingPage() {
         </div>
 
         <nav className="nav">
-          {dadosCliente ? (
-            <button className="btn-nav" onClick={irParaDashboard}>
-              Acessar Dashboard
-            </button>
+          {userName ? (
+            <>
+              <button className="btn-nav" onClick={irParaDashboard}>
+                Dashboard
+              </button>
+              <button className="btn-nav" onClick={irParaProdutos}>
+                Produtos
+              </button>
+            </>
           ) : (
             <button className="btn-nav" onClick={irParaLogin}>
               Entrar
@@ -50,20 +74,24 @@ function LandingPage() {
 
       <section className="hero">
         <div className="hero-text">
-          {dadosCliente ? (
+          {loadingCliente ? (
+            <h2>Carregando...</h2>
+          ) : userName ? (
             <>
               <h2>
-                Bem-vindo de volta, <span>{dadosCliente.nome}</span> 👋
+                Bom dia, <span>{userName}</span> 👋
               </h2>
               <p>
-                Pronto para continuar a gerir suas finanças com eficiência?
-                Acesse seu painel e veja seus resultados.
+                Continue a gerir suas finanças, acompanhe seus produtos e veja
+                seus resultados em tempo real.
               </p>
               <div className="hero-buttons">
                 <button className="btn-primary" onClick={irParaDashboard}>
-                  Ir para o Dashboard
+                  <i className="fi fi-sr-chart-pie-alt"></i> Ir para Dashboard
                 </button>
-
+                <button className="btn-secondary" onClick={irParaProdutos}>
+                  <i className="fi fi-sr-box"></i> Ir para Produtos
+                </button>
               </div>
             </>
           ) : (
@@ -76,13 +104,11 @@ function LandingPage() {
                 no que realmente importa: crescer de forma inteligente.
               </p>
               <div className="hero-buttons">
-                <button onClick={irParaLogin}>
-                  Começar agora
-                </button>
+                <button onClick={irParaLogin}>Começar agora</button>
                 <button onClick={irParaDashboard}>
                   <i className="fi fi-sr-chart-pie-alt"></i> Dashboard
                 </button>
-                <button onClick={() => navigate("/produtos")}>
+                <button onClick={irParaProdutos}>
                   <i className="fi fi-sr-box"></i> Produtos
                 </button>
               </div>
