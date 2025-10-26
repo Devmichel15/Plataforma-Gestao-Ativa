@@ -4,6 +4,8 @@ import Sign from "./components/Sign";
 import Checkout from "./components/Checkout";
 import Dashboard from "./components/Dashboard";
 import LandingPage from "./components/LandingPage";
+import Produtos from "./components/Produtos";
+import Chatbot from "./components/Chatbot";
 // ... outras importações
 
 function App() {
@@ -25,6 +27,8 @@ function App() {
         {/* Rota protegida */}
         <Route path="/" element={<Protegida element={<LandingPage />} />} />
         <Route path="/dashboard" element={<Protegida element={<Dashboard />} />} />
+        <Route path="/produtos" element={<Protegida element={<Produtos />} />} />
+        <Route path="/chatbot" element={<Protegida element={<Chatbot />} />} />
         {/* Adiciona outras rotas protegidas aqui */}
       </Routes>
     </Router>

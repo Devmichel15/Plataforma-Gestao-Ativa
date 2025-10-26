@@ -22,7 +22,6 @@ function LandingPage() {
       const nome = savedData?.dadosCliente?.nome;
       if (nome) {
         setUserName(nome);
-        console.log("✅ Usuário ativo (LocalStorage):", nome);
       }
     };
 
