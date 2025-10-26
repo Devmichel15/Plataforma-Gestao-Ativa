@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useFinanceData } from "../hooks/useFinanceData";
 import { useNavigate } from "react-router-dom";
-import "../styles/Checkout.css";
+import "../styles/checkout.css";
 
 function Checkout() {
   const { dadosCliente, ativarLicenca, isPago } = useFinanceData();

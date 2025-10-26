@@ -11,7 +11,7 @@ import Chatbot from "./components/Chatbot";
 function App() {
   const { isPago, dadosCliente } = useFinanceData();
 
-  // Proteção de rotas
+  // Proteção de rotas — usada apenas para páginas internas
   const Protegida = ({ element }) => {
     if (!dadosCliente) return <Navigate to="/sign" replace />;
     if (!isPago) return <Navigate to="/checkout" replace />;
@@ -21,15 +21,20 @@ function App() {
   return (
     <Router>
       <Routes>
+        {/* 🔹 Página inicial aberta para todos */}
+        <Route path="/" element={<LandingPage />} />
+
+        {/* 🔹 Rotas públicas */}
         <Route path="/sign" element={<Sign />} />
         <Route path="/checkout" element={<Checkout />} />
 
-        {/* Rota protegida */}
-        <Route path="/" element={<Protegida element={<LandingPage />} />} />
+        {/* 🔹 Rotas protegidas (somente usuários autenticados) */}
         <Route path="/dashboard" element={<Protegida element={<Dashboard />} />} />
         <Route path="/produtos" element={<Protegida element={<Produtos />} />} />
         <Route path="/chatbot" element={<Protegida element={<Chatbot />} />} />
-        {/* Adiciona outras rotas protegidas aqui */}
+
+        {/* 🔹 Redireciona rotas inválidas para a página inicial */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

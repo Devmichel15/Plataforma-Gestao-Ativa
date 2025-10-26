@@ -265,3 +265,173 @@ nav i {
     font-size: 2.2rem;
   }
 }
+
+/* ===========================
+   SEÇÕES INFORMATIVAS (dark)
+   =========================== */
+.dark-section {
+  background: var(--black);
+  color: var(--white);
+  padding: 100px 20px;
+  text-align: center;
+  border-radius: 12px;
+}
+
+.dark-section h3 {
+  font-size: 1.8rem;
+  margin-bottom: 50px;
+  color: var(--purple);
+  font-weight: 700;
+}
+
+.benefit-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.benefit-cards .card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  width: 280px;
+  transition: all 0.3s ease;
+}
+
+.benefit-cards .card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 0 18px rgba(107, 62, 255, 0.25);
+}
+
+.benefit-cards i {
+  font-size: 2rem;
+  color: var(--purple);
+  margin-bottom: 12px;
+}
+
+.benefit-cards h4 {
+  margin-bottom: 10px;
+  color: var(--white);
+  font-weight: 600;
+}
+
+.benefit-cards p {
+  color: var(--text-gray);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Feedback / Depoimentos */
+.feedback {
+  padding: 100px 20px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.02);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  margin-top: 14px;
+}
+
+.feedback h3 {
+  color: var(--purple);
+  font-size: 1.8rem;
+  margin-bottom: 40px;
+}
+
+.testimonials {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+}
+
+blockquote {
+  max-width: 650px;
+  background: rgba(255, 255, 255, 0.05);
+  border-left: 4px solid var(--purple);
+  padding: 25px 30px;
+  border-radius: var(--radius);
+  font-style: italic;
+  color: var(--text-gray);
+  line-height: 1.6;
+}
+
+blockquote span {
+  display: block;
+  margin-top: 12px;
+  font-weight: 700;
+  color: var(--white);
+}
+
+/* Footer */
+.dark-footer {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--text-gray);
+  text-align: center;
+  padding: 40px;
+  font-size: 0.9rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  margin-top: 14px;
+}
+
+/* ===========================
+   TOM DA GESTÃO ATIVA
+   =========================== */
+
+/* Gradiente sutil com as cores da marca */
+
+/* Destaques de texto */
+.highlight {
+  color: var(--orange);
+  font-weight: 600;
+}
+
+/* Bordas e brilhos sutis com o tom da marca */
+
+.tone-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.tone-section::before {
+  content: "";
+  position: absolute;
+  top: -30%;
+  left: -10%;
+  width: 120%;
+  height: 200%;
+  background: radial-gradient(circle at top left, rgba(107, 62, 255, 0.15), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.tone-section * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Efeito pulsante no botão principal */
+.pulse {
+  animation: pulseGlow 2.5s infinite;
+}
+
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(107, 62, 255, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(107, 62, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(107, 62, 255, 0);
+  }
+}
+
+/* Footer com brilho sutil */
+.tone-footer {
+  background: linear-gradient(180deg, rgba(107, 62, 255, 0.08), rgba(13, 13, 13, 1));
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
