@@ -5,16 +5,15 @@ import { useFinanceData } from "../hooks/useFinanceData";
 
 function Sign() {
   const navigate = useNavigate();
-  const { dadosCliente, atualizarDadosCliente, setDadosCliente } =
+  const { dadosCliente, atualizarDadosCliente, setDadosCliente, isPago } =
     useFinanceData();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
-  // 🔹 Preenche automaticamente caso já tenha cliente salvo
   useEffect(() => {
     if (dadosCliente) {
-      setName(dadosCliente.name || "");
+      setName(dadosCliente.nome || "");
       setEmail(dadosCliente.email || "");
     }
   }, [dadosCliente]);
@@ -22,7 +21,7 @@ function Sign() {
   async function RegisterUser(e) {
     e.preventDefault();
 
-    if (name.trim() === "" || email.trim() === "") {
+    if (!name.trim() || !email.trim()) {
       alert("Por favor, preencha todos os campos.");
       return;
     }
@@ -33,19 +32,24 @@ function Sign() {
       await atualizarDadosCliente(novoCliente);
       setDadosCliente(novoCliente);
       alert("Registo bem-sucedido!");
-      navigate("/"); // volta para landing page
+      navigate("/checkout"); // vai direto pra ativar
     } catch (err) {
       console.error("Erro ao registrar:", err);
-      alert("Ocorreu um erro ao registrar. Tente novamente.");
+      alert("Erro ao registrar. Tente novamente.");
     }
   }
 
   function handleLogout() {
-    localStorage.removeItem("gestaoActivaData");
+    localStorage.clear();
     setDadosCliente(null);
     alert("Sessão encerrada.");
     navigate("/sign");
   }
+
+  // se já tiver pago, vai pro app
+  useEffect(() => {
+    if (isPago && dadosCliente) navigate("/");
+  }, [isPago, dadosCliente, navigate]);
 
   return (
     <div className="login">
@@ -54,13 +58,22 @@ function Sign() {
           <div className="infosUser">
             <h2>Usuário Registado</h2>
             <p>
-              <b>Nome:</b> {dadosCliente.name}
+              <b>Nome:</b> {dadosCliente.nome}
             </p>
             <p>
               <b>Email:</b> {dadosCliente.email}
             </p>
 
             <div className="btns">
+              {!isPago && (
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => navigate("/checkout")}
+                >
+                  Ativar Acesso Premium
+                </button>
+              )}
               <button
                 type="button"
                 className="btn-secondary"
@@ -76,16 +89,16 @@ function Sign() {
             <input
               type="text"
               placeholder="Nome"
-              required
               value={name}
               onChange={(e) => setName(e.target.value)}
+              required
             />
             <input
               type="email"
               placeholder="Email"
-              required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              required
             />
             <button type="submit" className="btn-primary">
               Registar

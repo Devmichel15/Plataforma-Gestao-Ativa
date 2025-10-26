@@ -1,0 +1,29 @@
+.checkout {
+  max-width: 400px;
+  margin: 80px auto;
+  text-align: center;
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.checkout input {
+  width: 100%;
+  padding: 10px;
+  margin: 15px 0;
+  font-size: 16px;
+}
+
+.checkout .btn-primary {
+  background: #2e8b57;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.checkout .btn-primary:hover {
+  background: #267a4a;
+}

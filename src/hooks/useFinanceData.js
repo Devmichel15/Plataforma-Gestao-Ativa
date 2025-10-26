@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { openDB } from "idb";
+import CryptoJS from "crypto-js"; // npm install crypto-js
 
 // ======================
 // 🔹 CONFIGURAÇÃO DO INDEXEDDB
@@ -58,6 +59,33 @@ export function useFinanceData() {
   const [mensagens, setMensagens] = useState(savedData.mensagens || []);
   const [dadosCliente, setDadosCliente] = useState(savedData.dadosCliente);
   const [loadingCliente, setLoadingCliente] = useState(true);
+
+  // ======================
+  // 🔹 ACESSO PREMIUM LOCAL
+  // ======================
+  const [isPago, setIsPago] = useState(false);
+
+  useEffect(() => {
+    const licenca = JSON.parse(localStorage.getItem("gestaoActivaLicenca"));
+    if (licenca?.isPago) setIsPago(true);
+  }, []);
+
+  function ativarLicenca(email, token) {
+    const SECRET = "segredo_do_michel"; // muda pra tua chave
+    const hash = CryptoJS.SHA256(email + SECRET).toString().slice(0, 10);
+    const esperado = `GA-${hash}`;
+
+    if (token.trim() === esperado.trim()) {
+      localStorage.setItem(
+        "gestaoActivaLicenca",
+        JSON.stringify({ isPago: true, email })
+      );
+      setIsPago(true);
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   // ======================
   // 🔹 CARREGAR DADOS DO INDEXEDDB
@@ -121,9 +149,16 @@ export function useFinanceData() {
   }
 
   // ======================
-  // 🔹 FUNÇÕES DE PRODUTOS (ATUALIZADAS COM LUCRO)
+  // 🔹 FUNÇÕES DE PRODUTOS
   // ======================
-  async function adicionarProduto(nome, categoria, quantidade, precoVenda, precoCusto, lucro) {
+  async function adicionarProduto(
+    nome,
+    categoria,
+    quantidade,
+    precoVenda,
+    precoCusto,
+    lucro
+  ) {
     const novoProduto = {
       id: Date.now(),
       nome,
@@ -212,5 +247,7 @@ export function useFinanceData() {
     atualizarDadosCliente,
     transacoesPorData,
     produtosPorData,
+    isPago,
+    ativarLicenca,
   };
 }
